@@ -8,6 +8,20 @@
       "when": 1744738747925,
       "tag": "0000_sudden_killraven",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754214984798,
+      "tag": "0001_swift_dark_beast",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754317708570,
+      "tag": "0002_sad_lord_tyger",
+      "breakpoints": true
     }
   ]
 }
