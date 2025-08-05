@@ -25,7 +25,7 @@ export default [
       'max-len': [
         'warn',
         {
-          code: 100,
+          code: 130,
           ignoreStrings: true,
           ignoreTemplateLiterals: true,
           ignoreRegExpLiterals: true,
