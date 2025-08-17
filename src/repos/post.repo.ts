@@ -3,38 +3,86 @@ import { commentTable, postTable } from 'src/services/drizzle/schema';
 import { IPostRepo } from 'src/types/IPostRepo';
 import { Post, PostSchema } from 'src/types/Post';
 import { CommentSchema } from 'src/types/Comment';
-import { eq } from 'drizzle-orm';
+import { asc, desc, eq, count, sql } from 'drizzle-orm';
+import { jsonAggBuildObject } from 'src/services/drizzle/helpers/helpers';
 
 export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
   return{
-    async getPosts(){
-      const postsWithComments = await db.select({
-        post: postTable,
-        comment: commentTable
-      })
-      .from(postTable)
-      .leftJoin(commentTable, eq(postTable.id, commentTable.postId));
+    async getPosts(options) {
+      const limit = options?.limit || 10;
+      const offset = options?.page ? (options.page - 1) * limit : 0;
+      const order = options?.sortOrder === 'desc' ? desc : asc;
 
-      const postsMap = new Map<string, Post>();
-      
-      for (const row of postsWithComments) {
-        const postId = row.post.id;
-        
-        if (!postsMap.has(postId)) {
-          postsMap.set(postId, PostSchema.parse({
-            ...row.post,
-            comments: []
-          }));
-        }
-        
-        if (row.comment) {
-          const comment = CommentSchema.parse(row.comment);
-          const post = postsMap.get(postId)!;
-          post.comments!.push(comment);
-        }
-      }
-      
-      return Array.from(postsMap.values());
+      const searchSql = options?.search
+        ? sql`
+            (
+              similarity(${postTable.title}, ${options.search}) > 0.3
+              OR similarity(${postTable.description}, ${options.search}) > 0.3
+            )
+          `
+        : undefined;
+
+      // Total count
+      const totalResult = await db
+        .select({ count: count() })
+        .from(postTable)
+        .where(searchSql);
+
+      const total = totalResult[0]?.count || 0;
+
+      // Posts with comments
+      const postsWithComments = await db
+        .select({
+          post: postTable,
+          comments: jsonAggBuildObject({
+            id: commentTable.id,
+            postId: commentTable.postId,
+            text: commentTable.text,
+            createdAt: commentTable.createdAt,
+            updatedAt: commentTable.updatedAt
+          }),
+          similarityScore: options?.search
+            ? sql`GREATEST(
+                similarity(${postTable.title}, ${options.search}),
+                similarity(${postTable.description}, ${options.search})
+              )`
+            : sql`0`
+        })
+        .from(postTable)
+        .leftJoin(commentTable, eq(postTable.id, commentTable.postId))
+        .where(searchSql)
+        .groupBy(
+          postTable.id,
+          postTable.title,
+          postTable.description,
+          postTable.createdAt,
+          postTable.updatedAt
+        )
+        .having(
+          options?.commentCount !== undefined
+            ? eq(count(commentTable.id), options.commentCount)
+            : undefined
+        )
+        .orderBy(order(options?.sortBy === 'title' ? postTable.title : options?.sortBy === 'commentCount' ? count(commentTable.id) : postTable.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      const posts = postsWithComments.map(row => {
+        const comments = row.comments || [];
+        return PostSchema.parse({
+          ...row.post,
+          commentCount: comments.length,
+          comments: comments.map(comment =>
+            CommentSchema.parse({
+              ...comment,
+              createdAt: new Date(comment.createdAt!),
+              updatedAt: new Date(comment.updatedAt!)
+            })
+          )
+        });
+      });
+
+      return { posts, total };
     },
 
     async createPost(postData){
@@ -44,25 +92,43 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
 
     async getPostById(id){
       const postWithComments = await db.select({
-        post: postTable,
-        comment: commentTable
+        id: postTable.id,
+        title: postTable.title,
+        description: postTable.description,
+        createdAt: postTable.createdAt,
+        updatedAt: postTable.updatedAt,
+        comments: jsonAggBuildObject({
+          id: commentTable.id,
+          postId: commentTable.postId,
+          text: commentTable.text,
+          createdAt: commentTable.createdAt,
+          updatedAt: commentTable.updatedAt
+        })
       })
       .from(postTable)
       .leftJoin(commentTable, eq(postTable.id, commentTable.postId))
-      .where(eq(postTable.id, id));
+      .where(eq(postTable.id, id))
+      .groupBy(postTable.id, postTable.title, postTable.description, postTable.createdAt, postTable.updatedAt);
 
       if (postWithComments.length === 0) {
         throw new Error('Post not found');
       }
 
-      const post = PostSchema.parse({
-        ...postWithComments[0].post,
-        comments: postWithComments
-          .filter(row => row.comment)
-          .map(row => CommentSchema.parse(row.comment))
+      const row = postWithComments[0];
+      const comments = row.comments || [];
+      
+      return PostSchema.parse({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        comments: comments.map(comment => CommentSchema.parse({
+          ...comment,
+          createdAt: comment.createdAt ? new Date(comment.createdAt) : new Date(),
+          updatedAt: comment.updatedAt ? new Date(comment.updatedAt) : new Date()
+        }))
       });
-
-      return post;
     },
 
     async updatePostById(id, postData){

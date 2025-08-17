@@ -1,0 +1,14 @@
+{
+  "id": "0003_add_pg_trgm",
+  "prevId": "0002_sad_lord_tyger",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {},
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

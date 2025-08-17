@@ -1,21 +1,10 @@
 import { FastifyInstance } from 'fastify';
-import fastifyBasicAuth from '@fastify/basic-auth';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUI from '@fastify/swagger-ui';
 import { EErrorCodes, getErrorCodesDescription } from '../errors/EErrorCodes';
 import { jsonSchemaTransform } from 'fastify-type-provider-zod';
 
-export async function setupSwagger(server: FastifyInstance, userName: string, pwd: string) {
-  await server.register(fastifyBasicAuth, {
-    validate(u, p, _req, _reply, done) {
-      if (u === userName && pwd === p) {
-        done();
-      } else {
-        done(new Error('Unauthorized'));
-      }
-    },
-    authenticate: true
-  });
+export async function setupSwagger(server: FastifyInstance, _userName?: string, _pwd?: string) {
   await server.register(fastifySwagger, {
     openapi: {
       info: {
@@ -24,16 +13,7 @@ export async function setupSwagger(server: FastifyInstance, userName: string, pw
         version: '1.0.0'
       },
       servers: [],
-      security: [{ auth: [] }],
       components: {
-        securitySchemes: {
-          auth: {
-            description: 'Authorization header token, sample: "Bearer {TOKEN}"',
-            type: 'apiKey',
-            name: 'authorization',
-            in: 'header'
-          }
-        },
         schemas: {
           ErrorCodes: {
             type: 'integer',
@@ -47,9 +27,6 @@ export async function setupSwagger(server: FastifyInstance, userName: string, pw
   });
   await server.register(fastifySwaggerUI, {
     routePrefix: '/api/documentation',
-    logLevel: 'silent',
-    uiHooks: {
-      onRequest: server.basicAuth
-    }
+    logLevel: 'silent'
   });
 }
