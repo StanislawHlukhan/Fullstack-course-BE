@@ -5,6 +5,7 @@ import { IIdentityService } from 'src/types/IIdentityService';
 import { IMailService } from 'src/types/IMailService';
 import { IdentityUser } from 'src/types/IdentityUser';
 import { IStorageService } from './IStorageService';
+import { Profile } from './Profile';
 
 // set context type
 declare module 'fastify' {
@@ -19,5 +20,12 @@ declare module 'fastify' {
 
   interface FastifyRequest {
     identityUser?: IdentityUser;
+    profile?: Profile;
+  }
+  
+  interface FastifyContextConfig {
+    skipAuth?: boolean;
+    ignoreSurveyRoleCheck?: boolean;
   }
 }
+

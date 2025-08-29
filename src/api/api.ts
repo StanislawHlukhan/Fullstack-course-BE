@@ -18,6 +18,7 @@ import routePrinter from './plugins/route-printer.plugin';
 import { setupSwagger } from './plugins/swagger.plugin';
 import { getLoggerOptions } from './plugins/logger.plugin';
 import { getDb, dbHealthCheck } from 'src/services/drizzle/drizzle.service';
+import { getAWSCognitoService } from 'src/services/aws/cognito/cognito.service';
 
 async function run() {
   const server = fastify({
@@ -63,10 +64,11 @@ async function run() {
 
   // load context
   server.decorate('uuid', getUUIDService());
-  // server.decorate(
-  //   'identityService',
-  //   getAWSCognitoService(process.env.AWS_REGION)
-  // );
+  server.decorate(
+    'identityService',
+    getAWSCognitoService(process.env.AWS_REGION!)
+  );
+  
   server.decorate(
     'db',
     getDb({

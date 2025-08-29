@@ -8,7 +8,8 @@ export const PostSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   commentCount: z.number().optional(),
-  comments: z.array(CommentSchema).optional()
+  comments: z.array(CommentSchema).optional(),
+  createdBy: z.string().uuid()
 });
 
 export type Post = z.infer<typeof PostSchema>;

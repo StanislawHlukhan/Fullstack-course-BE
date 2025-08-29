@@ -1,10 +1,11 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { commentTable, postTable } from 'src/services/drizzle/schema';
+import { commentTable, postTable, profileTable } from 'src/services/drizzle/schema';
 import { IPostRepo } from 'src/types/IPostRepo';
 import { Post, PostSchema } from 'src/types/Post';
 import { CommentSchema } from 'src/types/Comment';
 import { asc, desc, eq, count, sql } from 'drizzle-orm';
 import { jsonAggBuildObject } from 'src/services/drizzle/helpers/helpers';
+import { PostWithProfileSchema } from 'src/types/PostWithProfile';
 
 export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
   return{
@@ -31,7 +32,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       const total = totalResult[0]?.count || 0;
 
       // Posts with comments
-      const postsWithComments = await db
+      const postsWithCommentsAndProfile = await db
         .select({
           post: postTable,
           comments: jsonAggBuildObject({
@@ -39,7 +40,17 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
             postId: commentTable.postId,
             text: commentTable.text,
             createdAt: commentTable.createdAt,
-            updatedAt: commentTable.updatedAt
+            updatedAt: commentTable.updatedAt,
+            createdBy: commentTable.createdBy
+          }),
+          profile: jsonAggBuildObject({
+            id: profileTable.id,
+            name: profileTable.name,
+            email: profileTable.email,
+            dickSize: profileTable.dickSize,
+            subId: profileTable.subId,
+            createdAt: profileTable.createdAt,
+            updatedAt: profileTable.updatedAt
           }),
           similarityScore: options?.search
             ? sql`GREATEST(
@@ -50,6 +61,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         })
         .from(postTable)
         .leftJoin(commentTable, eq(postTable.id, commentTable.postId))
+        .leftJoin(profileTable, eq(postTable.createdBy, profileTable.id))
         .where(searchSql)
         .groupBy(
           postTable.id,
@@ -67,10 +79,15 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         .limit(limit)
         .offset(offset);
 
-      const posts = postsWithComments.map(row => {
+      const posts = postsWithCommentsAndProfile.map(row => {
         const comments = row.comments || [];
-        return PostSchema.parse({
+        return PostWithProfileSchema.parse({
           ...row.post,
+          createdBy:{
+            ...row.profile[0],
+            createdAt: new Date(row.profile[0].createdAt!),
+            updatedAt: new Date(row.profile[0].updatedAt!)
+          },
           commentCount: comments.length,
           comments: comments.map(comment =>
             CommentSchema.parse({

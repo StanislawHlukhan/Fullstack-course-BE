@@ -5,6 +5,7 @@ import { createPost } from 'src/controllers/post/create-post';
 import { CreatePostReqSchema } from '../schemas/CreatePostReqSchema';
 import { PostSchema } from 'src/types/Post';
 import { z } from 'zod';
+import { PostWithProfileSchema } from 'src/types/PostWithProfile';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -12,17 +13,16 @@ const routes: FastifyPluginAsync = async function (f) {
   fastify.get('/', {
     schema: {
       querystring: z.object({
-        limit: z.string().optional(),
-        page: z.string().optional(),
+        limit: z.coerce.number().int().positive().optional(),
+        page: z.coerce.number().int().positive().optional(),
         search: z.string().optional(),
         sortBy: z.enum(['title', 'createdAt', 'commentCount']).nullable().optional(),
         sortOrder: z.enum(['asc', 'desc']).nullable().optional(),
-        commentCount: z.string().optional()
-        // z.coerce.number().int().positive().optional()
+        commentCount: z.coerce.number().int().optional()
       }),
       response: {
         200: z.object({
-          posts: PostSchema.array(),
+          posts: PostWithProfileSchema.array(),
           total: z.number()
         })
       }
@@ -31,12 +31,12 @@ const routes: FastifyPluginAsync = async function (f) {
      const result = await getPosts({
       postRepo: fastify.repos.postRepo,
       options: {
-        limit: Number(req.query.limit) || undefined,
-        page: Number(req.query.page) || undefined,
+        limit: req.query.limit || undefined,
+        page: req.query.page || undefined,
         search: req.query.search,
         sortBy: req.query.sortBy || undefined,
         sortOrder: req.query.sortOrder || undefined,
-        commentCount: Number(req.query.commentCount) || undefined
+        commentCount: req.query.commentCount || undefined
       }
     });
 
@@ -50,10 +50,13 @@ const routes: FastifyPluginAsync = async function (f) {
       },
       body: CreatePostReqSchema
     }
-  }, async (reg) => {
+  }, async (req) => {
     const post = await createPost({
       postRepo: fastify.repos.postRepo,
-      data: reg.body
+      data: {
+        ...req.body,
+        createdBy: req.profile!.id
+      }
     });
 
     return post;
