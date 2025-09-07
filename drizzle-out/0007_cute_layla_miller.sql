@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "system_role" varchar(255) DEFAULT 'user';

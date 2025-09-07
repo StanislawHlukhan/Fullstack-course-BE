@@ -1,5 +1,6 @@
 import { IIdentityService } from 'src/types/IIdentityService';
 import { IProfileRepo } from 'src/types/IProfileRepo';
+import { ESystemRole } from 'src/types/Profile';
 
 export async function createUser(params: {
   identityService: IIdentityService,
@@ -18,7 +19,8 @@ export async function createUser(params: {
     email: params.email,
     subId: identityUser.subId,
     name: params.name,
-    dickSize: params.dickSize
+    dickSize: params.dickSize,
+    systemRole: ESystemRole.user
   });
 
   await params.identityService.setPassword(profile.subId, params.password);

@@ -1,5 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
+import { ESystemRole } from 'src/types/Profile';
 import { z } from 'zod';
 
 const MeRespSchema = z.object({
@@ -8,7 +9,8 @@ const MeRespSchema = z.object({
   name: z.string(),
   dickSize: z.number(),
   createdAt: z.date(),
-  id: z.string().uuid()
+  id: z.string().uuid(),
+  systemRole: z.nativeEnum(ESystemRole)
 });
 
 const routes: FastifyPluginAsync = async function (f) {

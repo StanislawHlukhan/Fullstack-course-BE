@@ -50,7 +50,8 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
             dickSize: profileTable.dickSize,
             subId: profileTable.subId,
             createdAt: profileTable.createdAt,
-            updatedAt: profileTable.updatedAt
+            updatedAt: profileTable.updatedAt,
+            systemRole: profileTable.systemRole
           }),
           similarityScore: options?.search
             ? sql`GREATEST(

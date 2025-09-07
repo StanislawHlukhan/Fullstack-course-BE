@@ -12,6 +12,54 @@ export function getAWSCognitoService(region: string): IIdentityService {
 
   return {
 
+    async toggleUserAccount(subId, value) {
+      try {
+        if (value) {
+          await client.adminEnableUser({
+            UserPoolId: process.env.AWS_USER_POOL_ID,
+            Username: subId
+          });
+        } else {
+          await client.adminDisableUser({
+            UserPoolId: process.env.AWS_USER_POOL_ID,
+            Username: subId
+          });
+        }
+      } catch (err) {
+        throw new ApplicationError(`Cognito error - ${err}`);
+      }
+    },
+    // list users in cognito have required pagination 
+    async getUsers(subIds) {
+      try {
+        const users = await Promise.all(subIds.map(async (subId) => {
+          const user = await client.adminGetUser({
+            UserPoolId: process.env.AWS_USER_POOL_ID,
+            Username: subId
+          });
+
+          const attributesMap = user.UserAttributes?.reduce<Record<string, string>>((map, attr) => {
+            if (attr.Name && attr.Value !== undefined) {
+              map[attr.Name] = attr.Value;
+            }
+            return map;
+          }, {}) || {};
+
+          return IdentityUserSchema.parse({
+            subId: user.Username!,
+            email: attributesMap.email || '',
+            name: attributesMap.name || '',
+            emailVerified: attributesMap.email_verified === 'true',
+            isEnabled: user.Enabled,
+            mfaEnabled: !!user.UserMFASettingList
+          });
+        }));
+
+        return users;
+      } catch (err) {
+        throw new ApplicationError(`Cognito error - ${err}`);
+      }
+    },
     async getUserByAccessToken(token) {
       try {
         const user = await client.getUser({

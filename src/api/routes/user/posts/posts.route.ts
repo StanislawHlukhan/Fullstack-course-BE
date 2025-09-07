@@ -2,10 +2,10 @@ import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { getPosts } from 'src/controllers/post/get-posts';
 import { createPost } from 'src/controllers/post/create-post';
-import { CreatePostReqSchema } from '../schemas/CreatePostReqSchema';
 import { PostSchema } from 'src/types/Post';
 import { z } from 'zod';
 import { PostWithProfileSchema } from 'src/types/PostWithProfile';
+import { CreatePostReqSchema } from '../../schemas/CreatePostReqSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();

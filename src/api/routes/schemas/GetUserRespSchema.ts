@@ -6,5 +6,6 @@ export const GetUserRespSchema = z.object({
   email: z.string(),
   name: z.string(),
   dickSize: z.number(),
-  createdAt: z.date()
+  createdAt: z.date(),
+  isEnabled: z.boolean().optional()
 });
