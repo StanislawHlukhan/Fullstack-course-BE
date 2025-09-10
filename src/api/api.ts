@@ -19,6 +19,8 @@ import { setupSwagger } from './plugins/swagger.plugin';
 import { getLoggerOptions } from './plugins/logger.plugin';
 import { getDb, dbHealthCheck } from 'src/services/drizzle/drizzle.service';
 import { getAWSCognitoService } from 'src/services/aws/cognito/cognito.service';
+import { getMailService } from 'src/services/sendgrid/sendgrid.service';
+import { getAWSKMSService } from 'src/services/kms/kms.service';
 
 async function run() {
   const server = fastify({
@@ -64,6 +66,8 @@ async function run() {
 
   // load context
   server.decorate('uuid', getUUIDService());
+  server.decorate('mailService', getMailService(process.env.SENDGRID_API_KEY!));
+  server.decorate('cryptoService', getAWSKMSService(process.env.AWS_REGION!, process.env.AWS_KMS_KEY_ID!));
   server.decorate(
     'identityService',
     getAWSCognitoService(process.env.AWS_REGION!)

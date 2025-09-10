@@ -7,6 +7,12 @@ import { Profile, ProfileSchema } from 'src/types/Profile';
 export function getProfileRepo(db: NodePgDatabase): IProfileRepo {
   return {
 
+    async getByEmail(email, tx?: unknown) {
+      const conn = (tx || db) as NodePgDatabase;
+      const profile = await conn.select().from(profileTable).where(eq(profileTable.email, email)).limit(1);
+      return profile[0] ? ProfileSchema.parse(profile[0]) : null;
+    },
+
     async getProfileBySubId(subId) {
       const profile = await db.select().from(profileTable).where(eq(profileTable.subId, subId)).limit(1);
       return profile[0] ? ProfileSchema.parse(profile[0]) : null;
@@ -57,6 +63,10 @@ export function getProfileRepo(db: NodePgDatabase): IProfileRepo {
       const conn = (tx || db) as NodePgDatabase;
       const profile = await conn.select().from(profileTable).where(eq(profileTable.id, id)).limit(1);
       return profile[0] ? ProfileSchema.parse(profile[0]) : null;
+    },
+
+    async updateActivatedAt(id, activatedAt) {
+      await db.update(profileTable).set({ activatedAt }).where(eq(profileTable.id, id));
     }
   };
 }

@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';  
-import { createUser } from 'src/controllers/user/create-user';
-import { CreateUserReqSchema } from '../../schemas/CreateUserReqSchema';
+import { signupUser } from 'src/controllers/users/signup-user';
+import { SignupReqSchema } from '../../schemas/SignupReqSchema';
 import { GetUserRespSchema } from '../../schemas/GetUserRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
@@ -14,15 +14,15 @@ const routes: FastifyPluginAsync = async function (f) {
     routeOptions.config.skipAuth = true;
   });
   
-  fastify.post('/', {
+  fastify.post('/signup', {
     schema: {
-      body: CreateUserReqSchema,
+      body: SignupReqSchema,
       response: {
         200: GetUserRespSchema
       }
     }
   }, async (req) => {
-    const user = await createUser({
+    const user = await signupUser({
       identityService: fastify.identityService,
       profileRepo: fastify.repos.profileRepo,
       email: req.body.email,
@@ -33,6 +33,7 @@ const routes: FastifyPluginAsync = async function (f) {
     
     return user;
   });
+  
 };
 
 export default routes;

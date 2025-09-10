@@ -27,7 +27,8 @@ export async function getUsers(params: {
       email: profile.email!,
       name: profile.name,
       isEnabled: user.isEnabled,
-      dickSize: profile.dickSize
+      dickSize: profile.dickSize,
+      activatedAt: profile.activatedAt
       };
   });
 

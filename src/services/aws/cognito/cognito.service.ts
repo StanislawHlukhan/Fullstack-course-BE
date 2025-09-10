@@ -50,8 +50,7 @@ export function getAWSCognitoService(region: string): IIdentityService {
             email: attributesMap.email || '',
             name: attributesMap.name || '',
             emailVerified: attributesMap.email_verified === 'true',
-            isEnabled: user.Enabled,
-            mfaEnabled: !!user.UserMFASettingList
+            isEnabled: user.Enabled
           });
         }));
 

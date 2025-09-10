@@ -7,5 +7,6 @@ export const GetUserRespSchema = z.object({
   name: z.string(),
   dickSize: z.number(),
   createdAt: z.date(),
-  isEnabled: z.boolean().optional()
+  isEnabled: z.boolean().optional(),
+  activatedAt: z.date().nullable().optional()
 });

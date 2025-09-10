@@ -15,7 +15,8 @@ declare module 'fastify' {
     repos: IRepos;
     identityService: IIdentityService,
     mailService: IMailService,
-    storageService: IStorageService
+    storageService: IStorageService,
+    cryptoService: ICryptoService
   }
 
   interface FastifyRequest {

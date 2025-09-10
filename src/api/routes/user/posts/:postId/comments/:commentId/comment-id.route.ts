@@ -4,11 +4,13 @@ import { updateCommentByIdAndPostId } from 'src/controllers/comment/update-comme
 import { CreateCommentReqSchema } from 'src/api/routes/schemas/CreateCommentReqSchema';
 import { z } from 'zod';
 import { CommentSchema } from 'src/types/Comment';
+import { ownershipHook } from 'src/api/hooks/ownership.hook';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
 
   fastify.patch('/', {
+    preHandler: ownershipHook,
     schema: {
       response: {
         200: CommentSchema

@@ -6,7 +6,6 @@ export async function createUser(params: {
   identityService: IIdentityService,
   profileRepo: IProfileRepo,
   email: string,
-  password: string,
   name: string,
   dickSize: number
 }) {
@@ -23,13 +22,5 @@ export async function createUser(params: {
     systemRole: ESystemRole.user
   });
 
-  await params.identityService.setPassword(profile.subId, params.password);
-
-  return {
-    id: profile.id,
-    createdAt: profile.createdAt,
-    email: params.email,
-    name: params.name,
-    dickSize: params.dickSize
-  };
+  return profile;
 }

@@ -13,7 +13,13 @@ export const EnvSchema = z.object({
   PGPASSWORD: z.string(),
   PGDATABASE: z.string(),
   SWAGGER_USER: z.string(),
-  SWAGGER_PWD: z.string().min(10)
+  SWAGGER_PWD: z.string().min(10),
+  AWS_REGION: z.string(),
+  AWS_USER_POOL_ID: z.string(),
+  RESEND_API_KEY: z.string(),
+  FROM_EMAIL: z.string(),
+  FRONTEND_SIGNUP_URL: z.string(),
+  SENDGRID_API_KEY: z.string()
 });
 
 export type Env = z.infer<typeof EnvSchema>;

@@ -3,6 +3,8 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import { GetUsersRespSchema } from '../../schemas/GetUsersRespShema';
 import { getUsers } from 'src/controllers/users/get-users';
+import { createUser } from 'src/controllers/users/create-user';
+import { CreateUserReqSchema } from '../../schemas/CreateUserReqSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -27,6 +29,22 @@ const routes: FastifyPluginAsync = async function (f) {
       search: req.query.search || undefined
     });
     return users;
+  });
+
+  fastify.post('/create-user', {
+    schema: {
+      body: CreateUserReqSchema
+    }
+  }, async (req) => {
+    const user = await createUser({
+      identityService: fastify.identityService,
+      profileRepo: fastify.repos.profileRepo,
+      email: req.body.email,
+      name: req.body.name,
+      dickSize: req.body.dickSize
+    });
+
+    return user;
   });
 };
 
