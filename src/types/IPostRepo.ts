@@ -9,8 +9,11 @@ export interface IPostRepo {
     sortBy?: string;
     sortOrder?: string;
     commentCount?: number;
+    tagIds?: string[];
   }) => Promise<{ posts: PostWithProfile[]; total: number }>;
   createPost: (post: Partial<Post>) => Promise<Post>;
   getPostById: (id: string) => Promise<Post>;
   updatePostById: (id: string, post: Partial<Post>) => Promise<Post | null>;
+  addTagsToPost: (postId: string, tagIds: string[]) => Promise<void>;
+  removeTagsFromPost: (postId: string, tagIds: string[]) => Promise<void>;
 }

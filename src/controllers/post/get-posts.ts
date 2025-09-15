@@ -9,6 +9,7 @@ export async function getPosts(params: {
     sortBy?: string;
     sortOrder?: string;
     commentCount?: number;
+    tagIds?: string[];
   };
 }) {
   const result = await params.postRepo.getPosts(params.options);

@@ -18,7 +18,8 @@ const routes: FastifyPluginAsync = async function (f) {
         search: z.string().optional(),
         sortBy: z.enum(['title', 'createdAt', 'commentCount']).nullable().optional(),
         sortOrder: z.enum(['asc', 'desc']).nullable().optional(),
-        commentCount: z.coerce.number().int().optional()
+        commentCount: z.coerce.number().int().optional(),
+        tagIds: z.array(z.string().uuid()).optional().or(z.string().uuid().transform(val => [val]).optional())
       }),
       response: {
         200: z.object({
@@ -36,7 +37,8 @@ const routes: FastifyPluginAsync = async function (f) {
         search: req.query.search,
         sortBy: req.query.sortBy || undefined,
         sortOrder: req.query.sortOrder || undefined,
-        commentCount: req.query.commentCount || undefined
+        commentCount: req.query.commentCount || undefined,
+        tagIds: req.query.tagIds || undefined
       }
     });
 

@@ -64,6 +64,27 @@
       "when": 1757364065187,
       "tag": "0008_quick_makkari",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1757516379006,
+      "tag": "0009_ancient_king_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1757586111040,
+      "tag": "0010_bouncy_stature",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1757586390702,
+      "tag": "0011_sudden_turbo",
+      "breakpoints": true
     }
   ]
 }

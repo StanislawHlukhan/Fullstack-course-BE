@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CommentSchema } from './Comment';
+import { TagSchema } from './Tag';
 
 export const PostSchema = z.object({
   id: z.string().uuid(),
@@ -9,7 +10,8 @@ export const PostSchema = z.object({
   updatedAt: z.date(),
   commentCount: z.number().optional(),
   comments: z.array(CommentSchema).optional(),
-  createdBy: z.string().uuid()
+  createdBy: z.string().uuid(),
+  tags: z.array(TagSchema).optional()
 });
 
 export type Post = z.infer<typeof PostSchema>;

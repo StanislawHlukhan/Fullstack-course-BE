@@ -30,3 +30,18 @@ export const profileTable = pgTable('profiles', {
   systemRole: varchar({ length: 255 }).default('user'),
   activatedAt: timestamp()
 });
+
+export const tagTable = pgTable('tags', {
+  id: uuid().primaryKey().default(sql`uuid_generate_v4()`),
+  name: varchar({ length: 255 }).notNull(),
+  createdAt: timestamp().defaultNow(),
+  updatedAt: timestamp().defaultNow().$onUpdate(() => new Date())
+});
+
+export const tagToPostTable = pgTable('tag_to_posts', {
+  id: uuid().primaryKey().default(sql`uuid_generate_v4()`),
+  tagId: uuid().references(() => tagTable.id),
+  postId: uuid().references(() => postTable.id),
+  createdAt: timestamp().defaultNow(),
+  updatedAt: timestamp().defaultNow().$onUpdate(() => new Date())
+});

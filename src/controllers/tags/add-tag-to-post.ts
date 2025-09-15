@@ -7,5 +7,7 @@ export async function addTagToPost(params: {
   postId: string;
   tagIds: string[];
 }) {
+
+  // TODO: add check if tag exists and unique tags names
   await params.postRepo.addTagsToPost(params.postId, params.tagIds);
 }

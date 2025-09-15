@@ -1,11 +1,12 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { commentTable, postTable, profileTable } from 'src/services/drizzle/schema';
+import { commentTable, postTable, profileTable, tagTable, tagToPostTable } from 'src/services/drizzle/schema';
 import { IPostRepo } from 'src/types/IPostRepo';
 import { Post, PostSchema } from 'src/types/Post';
 import { CommentSchema } from 'src/types/Comment';
-import { asc, desc, eq, count, sql } from 'drizzle-orm';
+import { asc, desc, eq, count, sql, inArray } from 'drizzle-orm';
 import { jsonAggBuildObject } from 'src/services/drizzle/helpers/helpers';
 import { PostWithProfileSchema } from 'src/types/PostWithProfile';
+import { TagSchema } from 'src/types/Tag';
 
 export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
   return{
@@ -23,11 +24,27 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
           `
         : undefined;
 
+      const tagFilterSql = options?.tagIds && options.tagIds.length > 0
+        ? sql`${postTable.id} IN (
+            SELECT DISTINCT ${tagToPostTable.postId}
+            FROM ${tagToPostTable}
+            WHERE ${inArray(tagToPostTable.tagId, options.tagIds)}
+          )`
+        : undefined;
+
+      // Combine conditions
+      const whereConditions = [searchSql, tagFilterSql].filter(Boolean);
+      const combinedWhere = whereConditions.length > 0 
+        ? whereConditions.length === 1 
+          ? whereConditions[0] 
+          : sql`${whereConditions[0]} AND ${whereConditions[1]}`
+        : undefined;
+
       // Total count
       const totalResult = await db
         .select({ count: count() })
         .from(postTable)
-        .where(searchSql);
+        .where(combinedWhere);
 
       const total = totalResult[0]?.count || 0;
 
@@ -53,17 +70,19 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
             updatedAt: profileTable.updatedAt,
             systemRole: profileTable.systemRole
           }),
-          similarityScore: options?.search
-            ? sql`GREATEST(
-                similarity(${postTable.title}, ${options.search}),
-                similarity(${postTable.description}, ${options.search})
-              )`
-            : sql`0`
+          tags: jsonAggBuildObject({
+            id: tagTable.id,
+            name: tagTable.name,
+            createdAt: tagTable.createdAt,
+            updatedAt: tagTable.updatedAt
+          })
         })
         .from(postTable)
         .leftJoin(commentTable, eq(postTable.id, commentTable.postId))
         .leftJoin(profileTable, eq(postTable.createdBy, profileTable.id))
-        .where(searchSql)
+        .leftJoin(tagToPostTable, eq(postTable.id, tagToPostTable.postId))
+        .leftJoin(tagTable, eq(tagToPostTable.tagId, tagTable.id))
+        .where(combinedWhere)
         .groupBy(
           postTable.id,
           postTable.title,
@@ -95,6 +114,13 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
               ...comment,
               createdAt: new Date(comment.createdAt!),
               updatedAt: new Date(comment.updatedAt!)
+            })
+          ),
+          tags: row.tags.map(tag =>
+            TagSchema.parse({
+              ...tag,
+              createdAt: new Date(tag.createdAt!),
+              updatedAt: new Date(tag.updatedAt!)
             })
           )
         });
@@ -156,6 +182,20 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       .where(eq(postTable.id, id))
       .returning();
       return posts.length > 0 ? PostSchema.parse(posts[0]) : null;
+    },
+
+    // TODO: add to another folder
+    async addTagsToPost(postId: string, tagIds: string[]) {
+      const postTags = tagIds.map(tagId => ({ postId, tagId }));
+      await db.insert(tagToPostTable).values(postTags);
+    },
+
+    async removeTagsFromPost(postId: string, tagIds: string[]) {
+      await db.delete(tagToPostTable)
+        .where(
+          eq(tagToPostTable.postId, postId) &&
+          inArray(tagToPostTable.tagId, tagIds)
+        );
     }
   };
 };
