@@ -13,7 +13,8 @@ export const ProfileSchema = z.object({
   updatedAt: z.date(),
   subId: z.string(),
   systemRole: z.nativeEnum(ESystemRole),
-  activatedAt: z.date().nullable().optional()
+  activatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional()
 });
 
 export type Profile = z.infer<typeof ProfileSchema>;

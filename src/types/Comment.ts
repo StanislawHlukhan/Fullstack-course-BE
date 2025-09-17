@@ -6,7 +6,8 @@ export const CommentSchema = z.object({
   postId: z.string().uuid(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  createdBy: z.string().uuid()
+  createdBy: z.string().uuid(),
+  deletedAt: z.date().nullable().optional()
 });
 
 export type Comment = z.infer<typeof CommentSchema>;

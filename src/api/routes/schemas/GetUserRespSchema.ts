@@ -8,5 +8,6 @@ export const GetUserRespSchema = z.object({
   dickSize: z.number(),
   createdAt: z.date(),
   isEnabled: z.boolean().optional(),
-  activatedAt: z.date().nullable().optional()
+  activatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional()
 });

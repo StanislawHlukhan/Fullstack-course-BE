@@ -1,4 +1,4 @@
-import { uuid, pgTable, varchar, timestamp, integer } from 'drizzle-orm/pg-core';
+import { uuid, pgTable, varchar, timestamp, integer, jsonb } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const postTable = pgTable('posts', {
@@ -7,7 +7,8 @@ export const postTable = pgTable('posts', {
   description: varchar({ length: 255 }),
   createdAt: timestamp().defaultNow(),
   updatedAt: timestamp().defaultNow().$onUpdate(() => new Date()),
-  createdBy: uuid().references(() => profileTable.id)
+  createdBy: uuid().references(() => profileTable.id),
+  deletedAt: timestamp()
 });
 
 export const commentTable = pgTable('comments', {
@@ -16,7 +17,8 @@ export const commentTable = pgTable('comments', {
   text: varchar({ length: 255 }).notNull(),
   createdAt: timestamp().defaultNow(),
   updatedAt: timestamp().defaultNow().$onUpdate(() => new Date()),
-  createdBy: uuid().references(() => profileTable.id)
+  createdBy: uuid().references(() => profileTable.id),
+  deletedAt: timestamp()
 });
 
 export const profileTable = pgTable('profiles', {
@@ -28,7 +30,8 @@ export const profileTable = pgTable('profiles', {
   updatedAt: timestamp().defaultNow().$onUpdate(() => new Date()),
   dickSize: integer().notNull().default(1),
   systemRole: varchar({ length: 255 }).default('user'),
-  activatedAt: timestamp()
+  activatedAt: timestamp(),
+  deletedAt: timestamp()
 });
 
 export const tagTable = pgTable('tags', {
@@ -44,4 +47,15 @@ export const tagToPostTable = pgTable('tag_to_posts', {
   postId: uuid().references(() => postTable.id),
   createdAt: timestamp().defaultNow(),
   updatedAt: timestamp().defaultNow().$onUpdate(() => new Date())
+});
+
+export const archiveTable = pgTable('archives', {
+  id: uuid().primaryKey().default(sql`uuid_generate_v4()`),
+  archivedUserId: uuid().notNull(),
+  archivedAt: timestamp().defaultNow(),
+  userData: jsonb('user_data'),
+  postsData: jsonb('posts_data'),
+  commentsData: jsonb('comments_data'),
+  tagsData: jsonb('tags_data'),
+  createdAt: timestamp().defaultNow()
 });

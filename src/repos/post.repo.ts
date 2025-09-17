@@ -58,7 +58,8 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
             text: commentTable.text,
             createdAt: commentTable.createdAt,
             updatedAt: commentTable.updatedAt,
-            createdBy: commentTable.createdBy
+            createdBy: commentTable.createdBy,
+            deletedAt: commentTable.deletedAt
           }),
           profile: jsonAggBuildObject({
             id: profileTable.id,
@@ -68,7 +69,8 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
             subId: profileTable.subId,
             createdAt: profileTable.createdAt,
             updatedAt: profileTable.updatedAt,
-            systemRole: profileTable.systemRole
+            systemRole: profileTable.systemRole,
+            deletedAt: profileTable.deletedAt
           }),
           tags: jsonAggBuildObject({
             id: tagTable.id,
@@ -103,17 +105,20 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         const comments = row.comments || [];
         return PostWithProfileSchema.parse({
           ...row.post,
+          deletedAt: row.post.deletedAt ? new Date(row.post.deletedAt) : null,
           createdBy:{
             ...row.profile[0],
             createdAt: new Date(row.profile[0].createdAt!),
-            updatedAt: new Date(row.profile[0].updatedAt!)
+            updatedAt: new Date(row.profile[0].updatedAt!),
+            deletedAt: row.profile[0].deletedAt ? new Date(row.profile[0].deletedAt) : null
           },
           commentCount: comments.length,
           comments: comments.map(comment =>
             CommentSchema.parse({
               ...comment,
               createdAt: new Date(comment.createdAt!),
-              updatedAt: new Date(comment.updatedAt!)
+              updatedAt: new Date(comment.updatedAt!),
+              deletedAt: comment.deletedAt ? new Date(comment.deletedAt) : null
             })
           ),
           tags: row.tags.map(tag =>
@@ -129,6 +134,86 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       return { posts, total };
     },
 
+    async getPostsByProfileId(profileId) {
+      // Posts with comments and profile
+      const postsWithCommentsAndProfile = await db
+        .select({
+          post: postTable,
+          comments: jsonAggBuildObject({
+            id: commentTable.id,
+            postId: commentTable.postId,
+            text: commentTable.text,
+            createdAt: commentTable.createdAt,
+            updatedAt: commentTable.updatedAt,
+            createdBy: commentTable.createdBy,
+            deletedAt: commentTable.deletedAt
+          }),
+          profile: jsonAggBuildObject({
+            id: profileTable.id,
+            name: profileTable.name,
+            email: profileTable.email,
+            dickSize: profileTable.dickSize,
+            subId: profileTable.subId,
+            createdAt: profileTable.createdAt,
+            updatedAt: profileTable.updatedAt,
+            systemRole: profileTable.systemRole,
+            deletedAt: profileTable.deletedAt
+          }),
+          tags: jsonAggBuildObject({
+            id: tagTable.id,
+            name: tagTable.name,
+            createdAt: tagTable.createdAt,
+            updatedAt: tagTable.updatedAt
+          })
+        })
+        .from(postTable)
+        .leftJoin(commentTable, eq(postTable.id, commentTable.postId))
+        .leftJoin(profileTable, eq(postTable.createdBy, profileTable.id))
+        .leftJoin(tagToPostTable, eq(postTable.id, tagToPostTable.postId))
+        .leftJoin(tagTable, eq(tagToPostTable.tagId, tagTable.id))
+        .where(eq(postTable.createdBy, profileId))
+        .groupBy(
+          postTable.id,
+          postTable.title,
+          postTable.description,
+          postTable.createdAt,
+          postTable.updatedAt
+        )
+        .orderBy(desc(postTable.createdAt));
+
+      const posts = postsWithCommentsAndProfile.map(row => {
+        const comments = row.comments || [];
+        return PostWithProfileSchema.parse({
+          ...row.post,
+          deletedAt: row.post.deletedAt ? new Date(row.post.deletedAt) : null,
+          createdBy:{
+            ...row.profile[0],
+            createdAt: new Date(row.profile[0].createdAt!),
+            updatedAt: new Date(row.profile[0].updatedAt!),
+            deletedAt: row.profile[0].deletedAt ? new Date(row.profile[0].deletedAt) : null
+          },
+          commentCount: comments.length,
+          comments: comments.map(comment =>
+            CommentSchema.parse({
+              ...comment,
+              createdAt: new Date(comment.createdAt!),
+              updatedAt: new Date(comment.updatedAt!),
+              deletedAt: comment.deletedAt ? new Date(comment.deletedAt) : null
+            })
+          ),
+          tags: row.tags.map(tag =>
+            TagSchema.parse({
+              ...tag,
+              createdAt: new Date(tag.createdAt!),
+              updatedAt: new Date(tag.updatedAt!)
+            })
+          )
+        });
+      });
+
+      return { posts, total: posts.length };
+    },
+
     async createPost(postData){
       const post = await db.insert(postTable).values(postData as Post).returning();
       return PostSchema.parse(post[0]);
@@ -141,12 +226,14 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         description: postTable.description,
         createdAt: postTable.createdAt,
         updatedAt: postTable.updatedAt,
+        deletedAt: postTable.deletedAt,
         comments: jsonAggBuildObject({
           id: commentTable.id,
           postId: commentTable.postId,
           text: commentTable.text,
           createdAt: commentTable.createdAt,
-          updatedAt: commentTable.updatedAt
+          updatedAt: commentTable.updatedAt,
+          deletedAt: commentTable.deletedAt
         })
       })
       .from(postTable)
@@ -167,10 +254,12 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         description: row.description,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
+        deletedAt: row.deletedAt ? new Date(row.deletedAt) : null,
         comments: comments.map(comment => CommentSchema.parse({
           ...comment,
           createdAt: comment.createdAt ? new Date(comment.createdAt) : new Date(),
-          updatedAt: comment.updatedAt ? new Date(comment.updatedAt) : new Date()
+          updatedAt: comment.updatedAt ? new Date(comment.updatedAt) : new Date(),
+          deletedAt: comment.deletedAt ? new Date(comment.deletedAt) : null
         }))
       });
     },
@@ -182,20 +271,6 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       .where(eq(postTable.id, id))
       .returning();
       return posts.length > 0 ? PostSchema.parse(posts[0]) : null;
-    },
-
-    // TODO: add to another folder
-    async addTagsToPost(postId: string, tagIds: string[]) {
-      const postTags = tagIds.map(tagId => ({ postId, tagId }));
-      await db.insert(tagToPostTable).values(postTags);
-    },
-
-    async removeTagsFromPost(postId: string, tagIds: string[]) {
-      await db.delete(tagToPostTable)
-        .where(
-          eq(tagToPostTable.postId, postId) &&
-          inArray(tagToPostTable.tagId, tagIds)
-        );
     }
   };
 };

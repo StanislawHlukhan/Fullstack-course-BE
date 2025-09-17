@@ -11,7 +11,8 @@ export const PostSchema = z.object({
   commentCount: z.number().optional(),
   comments: z.array(CommentSchema).optional(),
   createdBy: z.string().uuid(),
-  tags: z.array(TagSchema).optional()
+  tags: z.array(TagSchema).optional(),
+  deletedAt: z.coerce.date().nullable().optional()
 });
 
 export type Post = z.infer<typeof PostSchema>;

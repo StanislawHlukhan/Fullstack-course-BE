@@ -1,11 +1,9 @@
-import { IPostRepo } from 'src/types/IPostRepo';
-import { ITagRepo } from 'src/types/ITagRepo';
+import { ITagToPostRepo } from 'src/types/ITagToPostRepo';
 
 export async function removeTagFromPost(params: {
-  postRepo: IPostRepo;
-  tagRepo: ITagRepo;
+  tagToPostRepo: ITagToPostRepo;
   postId: string;
   tagIds: string[];
 }) {
-  await params.postRepo.removeTagsFromPost(params.postId, params.tagIds);
+  await params.tagToPostRepo.removeTagsFromPost(params.postId, params.tagIds);
 }

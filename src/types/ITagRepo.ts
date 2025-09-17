@@ -5,4 +5,5 @@ export interface ITagRepo {
   createTag(tag: Partial<Tag>): Promise<Tag>;
   updateTagById(id: string, tag: Partial<Tag>): Promise<Tag | null>;
   deleteTagById(id: string): Promise<void>;
+  getTagByName(name: string): Promise<Tag[]>;
 }

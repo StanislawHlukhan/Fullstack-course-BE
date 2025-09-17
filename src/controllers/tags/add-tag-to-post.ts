@@ -1,13 +1,15 @@
-import { ITagRepo } from 'src/types/ITagRepo';
-import { IPostRepo } from 'src/types/IPostRepo';
+ import { ITagToPostRepo } from 'src/types/ITagToPostRepo';
 
 export async function addTagToPost(params: {
-  postRepo: IPostRepo;
-  tagRepo: ITagRepo;
+  tagToPostRepo: ITagToPostRepo;
   postId: string;
   tagIds: string[];
 }) {
+  const existingTags = await params.tagToPostRepo.getTagsByPostId(params.postId);
 
-  // TODO: add check if tag exists and unique tags names
-  await params.postRepo.addTagsToPost(params.postId, params.tagIds);
+  const newTagIds = params.tagIds.filter(tagId => !existingTags.some(tag => tag.id === tagId));
+
+  if (newTagIds.length > 0) {
+    await params.tagToPostRepo.addTagsToPost(params.postId, newTagIds);
+  }
 }

@@ -1,17 +1,13 @@
-import { IIdentityService } from 'src/types/IIdentityService';
 import { IProfileRepo } from 'src/types/IProfileRepo';
+import { IIdentityService } from 'src/types/IIdentityService';
 
-export async function getUsers(params: {
+export async function getSoftDeletedUsers(params: {
   profileRepo: IProfileRepo;
   identityService: IIdentityService;
-  limit?: number;
-  page?: number;
-  search?: string;
 }) {
-  const { profiles, total } = await params.profileRepo.getProfiles({
-    limit: params.limit,
-    page: params.page,
-    search: params.search
+  const { profiles } = await params.profileRepo.getProfiles({
+    limit: 100,
+    page: 1
   });
 
   const users = await params.identityService.getUsers(profiles.map(p => p.subId));
@@ -31,7 +27,11 @@ export async function getUsers(params: {
       activatedAt: profile.activatedAt,
       deletedAt: profile.deletedAt
       };
-  }).filter(user => user.deletedAt === null);
+  });
 
-  return { users: result, total };
+  const softDeletedUsers = result.filter(user => user.deletedAt);
+  if(!softDeletedUsers.length) {
+    throw new Error('No soft deleted users found');
+  }
+  return { users: softDeletedUsers, total: softDeletedUsers.length };
 }

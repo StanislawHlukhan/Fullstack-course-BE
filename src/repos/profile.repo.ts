@@ -1,6 +1,6 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { IProfileRepo } from 'src/types/IProfileRepo';
-import { profileTable } from 'src/services/drizzle/schema';
+import { commentTable, postTable, profileTable } from 'src/services/drizzle/schema';
 import { count, eq, sql } from 'drizzle-orm';
 import { Profile, ProfileSchema } from 'src/types/Profile';
 
@@ -67,6 +67,12 @@ export function getProfileRepo(db: NodePgDatabase): IProfileRepo {
 
     async updateActivatedAt(id, activatedAt) {
       await db.update(profileTable).set({ activatedAt }).where(eq(profileTable.id, id));
+    },
+
+    async updateDeletedAt(id, deletedAt) {
+      await db.update(profileTable).set({ deletedAt }).where(eq(profileTable.id, id));
+      await db.update(postTable).set({ deletedAt }).where(eq(postTable.createdBy, id));
+      await db.update(commentTable).set({ deletedAt }).where(eq(commentTable.createdBy, id));
     }
   };
 }

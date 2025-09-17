@@ -12,6 +12,17 @@ export async function getPosts(params: {
     tagIds?: string[];
   };
 }) {
-  const result = await params.postRepo.getPosts(params.options);
-  return result;
+  const res = await params.postRepo.getPosts(params.options);
+  
+  const filteredPosts = res.posts
+    .filter(post => post.deletedAt === null)
+    .map(post => ({
+      ...post,
+      comments: post.comments?.filter(comment => comment.deletedAt === null)
+    }));
+    
+     return {
+    posts: filteredPosts,
+    total: res.total
+  };
 }

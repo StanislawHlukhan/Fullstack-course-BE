@@ -42,6 +42,7 @@ const routes: FastifyPluginAsync = async function (f) {
   }, async (req) => {
     const tag = await deleteTag({
       tagRepo: fastify.repos.tagRepo,
+      tagToPostRepo: fastify.repos.tagToPostRepo,
       id: req.params.tagId
     });
     return tag;

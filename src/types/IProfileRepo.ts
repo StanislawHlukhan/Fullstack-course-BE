@@ -11,4 +11,5 @@ export interface IProfileRepo {
   }): Promise<{profiles: Profile[]; total: number}>
   getProfileById(id: string, tx?: unknown): Promise<Profile | null>;
   updateActivatedAt(id: string, activatedAt: Date): Promise<void>;
+  updateDeletedAt(id: string, deletedAt: Date | null): Promise<void>;
 }

@@ -48,9 +48,7 @@ async function run() {
   server.register(cors);
 
   // TODO check why in docker build it fails without "!"
-  if (['local', 'staging'].includes(process.env.NODE_ENV!)) {
-    await setupSwagger(server, process.env.SWAGGER_USER, process.env.SWAGGER_PWD);
-  }
+  await setupSwagger(server, process.env.SWAGGER_USER, process.env.SWAGGER_PWD);
 
   // set error handler
   server.setErrorHandler(errorHandler);

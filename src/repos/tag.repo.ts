@@ -20,6 +20,10 @@ export const getTagRepo = (db: NodePgDatabase): ITagRepo => {
     },
     async deleteTagById(id){
       await db.delete(tagTable).where(eq(tagTable.id, id));
+    },
+    async getTagByName(name){
+      const tag = await db.select().from(tagTable).where(eq(tagTable.name, name));
+      return TagSchema.array().parse(tag);
     }
   };
 };

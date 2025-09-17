@@ -46,8 +46,7 @@ const routes: FastifyPluginAsync = async function (f) {
     }
   }, async (req) => {
     const post = await addTagToPost({
-      tagRepo: fastify.repos.tagRepo,
-      postRepo: fastify.repos.postRepo,
+      tagToPostRepo: fastify.repos.tagToPostRepo,
       postId: req.params.postId,
       tagIds: req.body.tagIds
     });
@@ -71,8 +70,7 @@ const routes: FastifyPluginAsync = async function (f) {
     }
   }, async (req) => {
     const post = await removeTagFromPost({
-      tagRepo: fastify.repos.tagRepo,
-      postRepo: fastify.repos.postRepo,
+      tagToPostRepo: fastify.repos.tagToPostRepo,
       postId: req.params.postId,
       tagIds: req.body.tagIds
     });
