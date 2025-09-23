@@ -3,8 +3,9 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { createComment } from 'src/controllers/comment/create-comment';
 import { z } from 'zod';
 import { getCommentsByPostId } from 'src/controllers/comment/get-comments-by-post-id';
-import { CommentSchema } from 'src/types/Comment';
 import { CreateCommentReqSchema } from 'src/api/routes/schemas/CreateCommentReqSchema';
+import { GetCommentRespSchema } from 'src/api/routes/schemas/GetCommentRespShema';
+import { GetCommentsRespSchema } from 'src/api/routes/schemas/GetCommentsRespShema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -12,7 +13,7 @@ const routes: FastifyPluginAsync = async function (f) {
   fastify.post('/', {
     schema: {
       response: {
-        200: CommentSchema
+        200: GetCommentRespSchema
       },
       params: z.object({
         postId: z.string().uuid()
@@ -34,7 +35,7 @@ const routes: FastifyPluginAsync = async function (f) {
   fastify.get('/', {
     schema: {
       response: {
-        200: CommentSchema.array()
+        200: GetCommentsRespSchema
       },
       params: z.object({
         postId: z.string().uuid()

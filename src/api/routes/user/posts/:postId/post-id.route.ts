@@ -1,10 +1,11 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
-import { PostSchema } from 'src/types/Post';
+import { GetPostRespSchema } from 'src/api/routes/schemas/GetPostRespShema';
 import { updatePostById } from 'src/controllers/post/update-post-by-id';
 import { z } from 'zod';
 import { CreatePostReqSchema } from 'src/api/routes/schemas/CreatePostReqSchema';
 import { ownershipHook } from 'src/api/hooks/ownership.hook';
+
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
 
@@ -12,7 +13,7 @@ const routes: FastifyPluginAsync = async function (f) {
     preHandler: ownershipHook,
     schema: {
       response: {
-        200: PostSchema
+        200: GetPostRespSchema
       },
       params: z.object({
         postId: z.string()

@@ -4,8 +4,8 @@ import { getPosts } from 'src/controllers/post/get-posts';
 import { createPost } from 'src/controllers/post/create-post';
 import { PostSchema } from 'src/types/Post';
 import { z } from 'zod';
-import { PostWithProfileSchema } from 'src/types/PostWithProfile';
 import { CreatePostReqSchema } from '../../schemas/CreatePostReqSchema';
+import { GetPostsRespSchema } from '../../schemas/GetPostsRespShema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -22,10 +22,7 @@ const routes: FastifyPluginAsync = async function (f) {
         tagIds: z.array(z.string().uuid()).optional().or(z.string().uuid().transform(val => [val]).optional())
       }),
       response: {
-        200: z.object({
-          posts: PostWithProfileSchema.array(),
-          total: z.number()
-        })
+        200: GetPostsRespSchema
       }
     }
   }, async (req) => {

@@ -31,7 +31,6 @@ export async function getUsers(params: {
       activatedAt: profile.activatedAt,
       deletedAt: profile.deletedAt
       };
-  }).filter(user => user.deletedAt === null);
-
+  });
   return { users: result, total };
 }

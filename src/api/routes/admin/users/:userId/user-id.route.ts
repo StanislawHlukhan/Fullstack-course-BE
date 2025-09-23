@@ -9,6 +9,7 @@ import { PostWithProfileSchema } from 'src/types/PostWithProfile';
 import { hardDeleteUser } from 'src/controllers/users/hard-delete-user';
 import { hardRestoreUser } from 'src/controllers/users/hard-restore-user';
 import { getPostsByProfileId } from 'src/controllers/post/get-posts-by-profile-id';
+import { getTransactionManager } from 'src/services/drizzle/drizzle.service';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -55,7 +56,12 @@ const routes: FastifyPluginAsync = async function (f) {
     }
   }, async (req) => {
     await hardDeleteUser({
-      repos: fastify.repos,
+      profileRepo: fastify.repos.profileRepo,
+      postRepo: fastify.repos.postRepo,
+      commentRepo: fastify.repos.commentRepo,
+      archiveRepo: fastify.repos.archiveRepo,
+      tagToPostRepo: fastify.repos.tagToPostRepo,
+      transactionManager: getTransactionManager(fastify.db),
       userId: req.params.userId
     });
   });
@@ -68,7 +74,12 @@ const routes: FastifyPluginAsync = async function (f) {
     }
   }, async (req) => {
     await hardRestoreUser({
-      repos: fastify.repos,
+      profileRepo: fastify.repos.profileRepo,
+      postRepo: fastify.repos.postRepo,
+      commentRepo: fastify.repos.commentRepo,
+      archiveRepo: fastify.repos.archiveRepo,
+      tagToPostRepo: fastify.repos.tagToPostRepo,
+      transactionManager: getTransactionManager(fastify.db),
       userId: req.params.userId
     });
   });
@@ -82,6 +93,10 @@ const routes: FastifyPluginAsync = async function (f) {
   }, async req => {
     await softRestoreUser({
       profileRepo: fastify.repos.profileRepo,
+      postRepo: fastify.repos.postRepo,
+      commentRepo: fastify.repos.commentRepo,
+      transactionManager: getTransactionManager(fastify.db),
+      identityService: fastify.identityService,
       id: req.params.userId
     });
   });
@@ -95,6 +110,10 @@ const routes: FastifyPluginAsync = async function (f) {
   }, async req => {
     await softDeleteUser({
       profileRepo: fastify.repos.profileRepo,
+      postRepo: fastify.repos.postRepo,
+      commentRepo: fastify.repos.commentRepo,
+      transactionManager: getTransactionManager(fastify.db),
+      identityService: fastify.identityService,
       id: req.params.userId
     });
   });

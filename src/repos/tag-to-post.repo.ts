@@ -6,9 +6,10 @@ import { TagSchema } from 'src/types/Tag';
 
 export const getTagToPostRepo = (db: NodePgDatabase): ITagToPostRepo => {
   return{
-    async addTagsToPost(postId: string, tagIds: string[]) {
+    async addTagsToPost(postId: string, tagIds: string[], tx?: unknown) {
+      const conn = (tx || db) as NodePgDatabase;
       const postTags = tagIds.map(tagId => ({ postId, tagId }));
-      await db.insert(tagToPostTable).values(postTags);
+      await conn.insert(tagToPostTable).values(postTags);
     },
 
     async removeTagsFromPost(postId: string, tagIds: string[]) {
@@ -38,6 +39,34 @@ export const getTagToPostRepo = (db: NodePgDatabase): ITagToPostRepo => {
     async removeTagFromAllPosts(tagId: string) {
       await db.delete(tagToPostTable)
         .where(eq(tagToPostTable.tagId, tagId));
+    },
+
+    async getTagsByPostIds(postIds: string[], tx?: unknown) {
+      const conn = (tx || db) as NodePgDatabase;
+      if (postIds.length === 0) {
+        return [];
+      }
+      
+      const tags = await conn.select({
+        postId: tagToPostTable.postId,
+        id: tagTable.id,
+        name: tagTable.name,
+        createdAt: tagTable.createdAt,
+        updatedAt: tagTable.updatedAt
+      })
+      .from(tagToPostTable)
+      .leftJoin(tagTable, eq(tagToPostTable.tagId, tagTable.id))
+      .where(inArray(tagToPostTable.postId, postIds));
+      
+      return tags;
+    },
+
+    async deleteTagsByPostIds(postIds: string[], tx?: unknown) {
+      const conn = (tx || db) as NodePgDatabase;
+      if (postIds.length === 0) {
+        return;
+      }
+      await conn.delete(tagToPostTable).where(inArray(tagToPostTable.postId, postIds));
     }
   };
 };

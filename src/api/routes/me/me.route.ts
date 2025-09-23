@@ -1,17 +1,6 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
-import { ESystemRole } from 'src/types/Profile';
-import { z } from 'zod';
-
-const MeRespSchema = z.object({
-  email: z.string().optional().nullable(),
-  subId: z.string(),
-  name: z.string(),
-  dickSize: z.number(),
-  createdAt: z.date(),
-  id: z.string().uuid(),
-  systemRole: z.nativeEnum(ESystemRole)
-});
+import { GetMeRespSchema } from '../schemas/GetMeRespShema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -19,7 +8,7 @@ const routes: FastifyPluginAsync = async function (f) {
   fastify.get('/', {
     schema: {
       response: {
-        200: MeRespSchema
+        200: GetMeRespSchema
       }
     }
   }, async req => {

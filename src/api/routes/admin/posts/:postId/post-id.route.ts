@@ -1,11 +1,14 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
-import { PostSchema } from 'src/types/Post';
 import { updatePostById } from 'src/controllers/post/update-post-by-id';
 import { z } from 'zod';
 import { CreatePostReqSchema } from 'src/api/routes/schemas/CreatePostReqSchema';
 import { addTagToPost } from 'src/controllers/tags/add-tag-to-post';
 import { removeTagFromPost } from 'src/controllers/tags/remove-tag-from-post';
+import { softDeletePost } from 'src/controllers/post/soft-delete-post';
+import { softRestorePost } from 'src/controllers/post/soft-restore-post';
+import { getTransactionManager } from 'src/services/drizzle/drizzle.service';
+import { GetPostRespSchema } from 'src/api/routes/schemas/GetPostRespShema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -13,7 +16,7 @@ const routes: FastifyPluginAsync = async function (f) {
   fastify.patch('/', {
     schema: {
       response: {
-        200: PostSchema
+        200: GetPostRespSchema
       },
       params: z.object({
         postId: z.string()
@@ -77,7 +80,50 @@ const routes: FastifyPluginAsync = async function (f) {
 
     return post;
   });
-  
+
+  fastify.delete('/soft-delete', {
+    schema: {
+      params: z.object({
+        postId: z.string()
+      }),
+      response: {
+        200: z.object({
+          success: z.boolean()
+        })
+      }
+    }
+  }, async (req) => {
+    const post = await softDeletePost({
+      postRepo: fastify.repos.postRepo,
+      commentRepo: fastify.repos.commentRepo,
+      transactionManager: getTransactionManager(fastify.db),
+      id: req.params.postId
+    });
+
+    return post;
+  });
+
+  fastify.post('/soft-restore', {
+    schema: {
+      params: z.object({
+        postId: z.string()
+      }),
+      response: {
+        200: z.object({
+          success: z.boolean()
+        })
+      }
+    }
+  }, async (req) => {
+    const post = await softRestorePost({
+      postRepo: fastify.repos.postRepo,
+      commentRepo: fastify.repos.commentRepo,
+      transactionManager: getTransactionManager(fastify.db),
+      id: req.params.postId
+    });
+
+    return post;
+  });
 };
 
 export default routes;

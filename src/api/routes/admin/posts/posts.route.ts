@@ -3,9 +3,11 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { getPosts } from 'src/controllers/post/get-posts';
 import { createPost } from 'src/controllers/post/create-post';
 import { CreatePostReqSchema } from '../../schemas/CreatePostReqSchema';
-import { PostSchema } from 'src/types/Post';
 import { z } from 'zod';
 import { PostWithProfileSchema } from 'src/types/PostWithProfile';
+import { getSoftDeletedPosts } from 'src/controllers/post/get-soft-deleted-posts';
+import { GetPostsRespSchema } from '../../schemas/GetPostsRespShema';
+import { GetPostRespSchema } from 'src/api/routes/schemas/GetPostRespShema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -22,10 +24,7 @@ const routes: FastifyPluginAsync = async function (f) {
         tagIds: z.array(z.string().uuid()).optional().or(z.string().uuid().transform(val => [val]).optional())
       }),
       response: {
-        200: z.object({
-          posts: PostWithProfileSchema.array(),
-          total: z.number()
-        })
+        200: GetPostsRespSchema
       }
     }
   }, async (req) => {
@@ -48,7 +47,7 @@ const routes: FastifyPluginAsync = async function (f) {
   fastify.post('/', {
     schema: {
       response: {
-        200: PostSchema
+        200: GetPostRespSchema
       },
       body: CreatePostReqSchema
     }
@@ -62,6 +61,23 @@ const routes: FastifyPluginAsync = async function (f) {
     });
 
     return post;
+  });
+
+  fastify.get('/soft-deleted', {
+    schema: {
+      response: {
+        200: z.object({
+          posts: PostWithProfileSchema.array(),
+          total: z.number()
+        })
+      }
+    }
+  }, async () => {
+    const posts = await getSoftDeletedPosts({
+      postRepo: fastify.repos.postRepo
+    });
+
+    return posts;
   });
 };
 

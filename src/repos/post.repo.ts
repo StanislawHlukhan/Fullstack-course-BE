@@ -214,13 +214,15 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       return { posts, total: posts.length };
     },
 
-    async createPost(postData){
-      const post = await db.insert(postTable).values(postData as Post).returning();
+    async createPost(postData, tx?: unknown){
+      const conn = (tx || db) as NodePgDatabase;
+      const post = await conn.insert(postTable).values(postData as Post).returning();
       return PostSchema.parse(post[0]);
     },
 
-    async getPostById(id){
-      const postWithComments = await db.select({
+    async getPostById(id, tx?: unknown){
+      const conn = (tx || db) as NodePgDatabase;
+      const postWithComments = await conn.select({
         id: postTable.id,
         title: postTable.title,
         description: postTable.description,
@@ -271,6 +273,22 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       .where(eq(postTable.id, id))
       .returning();
       return posts.length > 0 ? PostSchema.parse(posts[0]) : null;
+    },
+
+    async updateDeletedAt(id, deletedAt, tx?: unknown){
+      const conn = (tx || db) as NodePgDatabase;
+      await conn.update(postTable).set({ deletedAt }).where(eq(postTable.createdBy, id));
+    },
+
+    async hardDeletePost(id, tx?: unknown){
+      const conn = (tx || db) as NodePgDatabase;
+      await conn.delete(postTable).where(eq(postTable.createdBy, id));
+    },
+
+    async getPostsByUserId(userId, tx?: unknown) {
+      const conn = (tx || db) as NodePgDatabase;
+      const posts = await conn.select().from(postTable).where(eq(postTable.createdBy, userId));
+      return PostSchema.array().parse(posts);
     }
   };
 };

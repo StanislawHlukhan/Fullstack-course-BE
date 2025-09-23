@@ -5,10 +5,7 @@ export async function getSoftDeletedUsers(params: {
   profileRepo: IProfileRepo;
   identityService: IIdentityService;
 }) {
-  const { profiles } = await params.profileRepo.getProfiles({
-    limit: 100,
-    page: 1
-  });
+  const profiles = await params.profileRepo.getSoftDeletedProfiles();
 
   const users = await params.identityService.getUsers(profiles.map(p => p.subId));
 
@@ -29,9 +26,8 @@ export async function getSoftDeletedUsers(params: {
       };
   });
 
-  const softDeletedUsers = result.filter(user => user.deletedAt);
-  if(!softDeletedUsers.length) {
+  if(!result.length) {
     throw new Error('No soft deleted users found');
   }
-  return { users: softDeletedUsers, total: softDeletedUsers.length };
+  return { users: result, total: result.length };
 }

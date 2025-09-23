@@ -11,5 +11,7 @@ export interface IProfileRepo {
   }): Promise<{profiles: Profile[]; total: number}>
   getProfileById(id: string, tx?: unknown): Promise<Profile | null>;
   updateActivatedAt(id: string, activatedAt: Date): Promise<void>;
-  updateDeletedAt(id: string, deletedAt: Date | null): Promise<void>;
+  updateDeletedAt(id: string, deletedAt: Date | null, tx?: unknown): Promise<void>;
+  hardDeleteProfile(id: string, tx?: unknown): Promise<void>;
+  getSoftDeletedProfiles(): Promise<Profile[]>;
 }

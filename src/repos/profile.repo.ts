@@ -1,8 +1,9 @@
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { IProfileRepo } from 'src/types/IProfileRepo';
-import { commentTable, postTable, profileTable } from 'src/services/drizzle/schema';
-import { count, eq, sql } from 'drizzle-orm';
+import { profileTable } from 'src/services/drizzle/schema';
+import { and, count, eq, isNull, sql } from 'drizzle-orm';
 import { Profile, ProfileSchema } from 'src/types/Profile';
+import { isNotNull } from 'drizzle-orm';
 
 export function getProfileRepo(db: NodePgDatabase): IProfileRepo {
   return {
@@ -28,16 +29,12 @@ export function getProfileRepo(db: NodePgDatabase): IProfileRepo {
       const limit = options?.limit || 10;
       const offset = options?.page ? (options.page - 1) * limit : 0;
 
-      let whereClause = undefined;
+      let whereClause;
       
       if (options?.search) {
-        whereClause = sql`
-          (
-            ${profileTable.name} ILIKE ${`%${options.search}%`}
-            OR ${profileTable.email} ILIKE ${`%${options.search}%`}
-            OR similarity(${profileTable.name}, ${options.search}) > 0.3
-          )
-        `;
+        whereClause = and(isNull(profileTable.deletedAt), sql`similarity(${profileTable.name}, ${options.search}) > 0.3`);
+      } else {
+        whereClause = isNull(profileTable.deletedAt);
       }
 
       // Get total count with search filter
@@ -69,10 +66,19 @@ export function getProfileRepo(db: NodePgDatabase): IProfileRepo {
       await db.update(profileTable).set({ activatedAt }).where(eq(profileTable.id, id));
     },
 
-    async updateDeletedAt(id, deletedAt) {
-      await db.update(profileTable).set({ deletedAt }).where(eq(profileTable.id, id));
-      await db.update(postTable).set({ deletedAt }).where(eq(postTable.createdBy, id));
-      await db.update(commentTable).set({ deletedAt }).where(eq(commentTable.createdBy, id));
+    async updateDeletedAt(id, deletedAt, tx?: unknown) {
+      const conn = (tx || db) as NodePgDatabase;
+      await conn.update(profileTable).set({ deletedAt }).where(eq(profileTable.id, id));
+    },
+
+    async hardDeleteProfile(id, tx?: unknown) {
+      const conn = (tx || db) as NodePgDatabase;
+      await conn.delete(profileTable).where(eq(profileTable.id, id));
+    },
+
+    async getSoftDeletedProfiles() {
+      const profiles = await db.select().from(profileTable).where(isNotNull(profileTable.deletedAt));
+      return ProfileSchema.array().parse(profiles);
     }
   };
 }
