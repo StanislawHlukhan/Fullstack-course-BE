@@ -4,10 +4,10 @@ import { getPosts } from 'src/controllers/post/get-posts';
 import { createPost } from 'src/controllers/post/create-post';
 import { CreatePostReqSchema } from '../../schemas/CreatePostReqSchema';
 import { z } from 'zod';
-import { PostWithProfileSchema } from 'src/types/PostWithProfile';
 import { getSoftDeletedPosts } from 'src/controllers/post/get-soft-deleted-posts';
 import { GetPostsRespSchema } from '../../schemas/GetPostsRespShema';
 import { GetPostRespSchema } from 'src/api/routes/schemas/GetPostRespShema';
+import { GetSoftDeletedPostsRespSchema } from 'src/api/routes/schemas/GetSoftDeletedPostsRespShema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -66,10 +66,7 @@ const routes: FastifyPluginAsync = async function (f) {
   fastify.get('/soft-deleted', {
     schema: {
       response: {
-        200: z.object({
-          posts: PostWithProfileSchema.array(),
-          total: z.number()
-        })
+        200: GetSoftDeletedPostsRespSchema
       }
     }
   }, async () => {

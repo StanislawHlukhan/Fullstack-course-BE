@@ -28,7 +28,7 @@ export const getCommentRepo = (db: NodePgDatabase): ICommentRepo => {
 
    async updateDeletedAt(id, deletedAt, tx?: unknown){
     const conn = (tx || db) as NodePgDatabase;
-    await conn.update(commentTable).set({ deletedAt }).where(eq(commentTable.createdBy, id));
+    await conn.update(commentTable).set({ deletedAt }).where(eq(commentTable.postId, id));
    },
 
    async hardDeleteComment(userId, tx?: unknown){

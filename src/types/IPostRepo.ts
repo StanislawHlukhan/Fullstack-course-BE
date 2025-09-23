@@ -18,4 +18,5 @@ export interface IPostRepo {
   updateDeletedAt: (id: string, deletedAt: Date | null, tx?: unknown) => Promise<void>;
   hardDeletePost: (id: string, tx?: unknown) => Promise<void>;
   getPostsByUserId: (userId: string, tx?: unknown) => Promise<Post[]>;
+  getSoftDeletedPosts: (tx?: unknown) => Promise<Post[]>;
 }

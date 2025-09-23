@@ -13,16 +13,6 @@ export async function getPosts(params: {
   };
 }) {
   const res = await params.postRepo.getPosts(params.options);
-  
-  const filteredPosts = res.posts
-    .filter(post => post.deletedAt === null)
-    .map(post => ({
-      ...post,
-      comments: post.comments?.filter(comment => comment.deletedAt === null)
-    }));
     
-     return {
-    posts: filteredPosts,
-    total: res.total
-  };
+  return { posts: res.posts,total: res.total };
 }

@@ -3,7 +3,7 @@ import { commentTable, postTable, profileTable, tagTable, tagToPostTable } from 
 import { IPostRepo } from 'src/types/IPostRepo';
 import { Post, PostSchema } from 'src/types/Post';
 import { CommentSchema } from 'src/types/Comment';
-import { asc, desc, eq, count, sql, inArray } from 'drizzle-orm';
+import { asc, desc, eq, count, sql, inArray, exists, and, isNull, isNotNull } from 'drizzle-orm';
 import { jsonAggBuildObject } from 'src/services/drizzle/helpers/helpers';
 import { PostWithProfileSchema } from 'src/types/PostWithProfile';
 import { TagSchema } from 'src/types/Tag';
@@ -24,20 +24,27 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
           `
         : undefined;
 
-      const tagFilterSql = options?.tagIds && options.tagIds.length > 0
-        ? sql`${postTable.id} IN (
-            SELECT DISTINCT ${tagToPostTable.postId}
-            FROM ${tagToPostTable}
-            WHERE ${inArray(tagToPostTable.tagId, options.tagIds)}
-          )`
+      const tagFilter = options?.tagIds && options.tagIds.length > 0
+        ? exists(
+            db.select()
+              .from(tagToPostTable)
+              .where(
+                and(
+                  eq(tagToPostTable.postId, postTable.id),
+                  inArray(tagToPostTable.tagId, options.tagIds)
+                )
+              )
+          )
         : undefined;
-
-      // Combine conditions
-      const whereConditions = [searchSql, tagFilterSql].filter(Boolean);
+      
+      const activeFilter = isNull(postTable.deletedAt);
+      
+      // Combine conditions using Drizzle functions
+      const whereConditions = [searchSql, tagFilter, activeFilter].filter(Boolean);
       const combinedWhere = whereConditions.length > 0 
-        ? whereConditions.length === 1 
-          ? whereConditions[0] 
-          : sql`${whereConditions[0]} AND ${whereConditions[1]}`
+        ? whereConditions.reduce((acc, condition) => 
+            acc ? and(acc, condition) : condition
+          )
         : undefined;
 
       // Total count
@@ -277,7 +284,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
 
     async updateDeletedAt(id, deletedAt, tx?: unknown){
       const conn = (tx || db) as NodePgDatabase;
-      await conn.update(postTable).set({ deletedAt }).where(eq(postTable.createdBy, id));
+      await conn.update(postTable).set({ deletedAt }).where(eq(postTable.id, id));
     },
 
     async hardDeletePost(id, tx?: unknown){
@@ -288,6 +295,12 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
     async getPostsByUserId(userId, tx?: unknown) {
       const conn = (tx || db) as NodePgDatabase;
       const posts = await conn.select().from(postTable).where(eq(postTable.createdBy, userId));
+      return PostSchema.array().parse(posts);
+    },
+
+    async getSoftDeletedPosts(tx?: unknown) {
+      const conn = (tx || db) as NodePgDatabase;
+      const posts = await conn.select().from(postTable).where(isNotNull(postTable.deletedAt));
       return PostSchema.array().parse(posts);
     }
   };
