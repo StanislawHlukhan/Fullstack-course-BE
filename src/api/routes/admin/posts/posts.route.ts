@@ -21,7 +21,7 @@ const routes: FastifyPluginAsync = async function (f) {
         sortBy: z.enum(['title', 'createdAt', 'commentCount']).nullable().optional(),
         sortOrder: z.enum(['asc', 'desc']).nullable().optional(),
         commentCount: z.coerce.number().int().optional(),
-        tagIds: z.array(z.string().uuid()).optional().or(z.string().uuid().transform(val => [val]).optional())
+        tagIds: z.array(z.string().uuid()).optional()
       }),
       response: {
         200: GetPostsRespSchema
