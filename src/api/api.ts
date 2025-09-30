@@ -21,6 +21,7 @@ import { getDb, dbHealthCheck } from 'src/services/drizzle/drizzle.service';
 import { getAWSCognitoService } from 'src/services/aws/cognito/cognito.service';
 import { getMailService } from 'src/services/sendgrid/sendgrid.service';
 import { getAWSKMSService } from 'src/services/kms/kms.service';
+import fastifyRawBody from 'fastify-raw-body';
 
 async function run() {
   const server = fastify({
@@ -99,7 +100,13 @@ async function run() {
     skip: ['/api/documentation'],
     logLevel: 'silent'
   });
-
+  server.register(fastifyRawBody, {
+    field: 'rawBody',   
+    global: true,     
+    encoding: 'utf8',
+    runFirst: true,
+    routes: [] // Apply to all routes by default
+  });
   // load routes
   server.register(autoload, {
     dir: path.join(__dirname, 'routes'),

@@ -79,6 +79,10 @@ export function getProfileRepo(db: NodePgDatabase): IProfileRepo {
     async getSoftDeletedProfiles() {
       const profiles = await db.select().from(profileTable).where(isNotNull(profileTable.deletedAt));
       return ProfileSchema.array().parse(profiles);
+    },
+
+    async updateStripeCustomerId(id, stripeCustomerId) {
+      await db.update(profileTable).set({ stripeCustomerId }).where(eq(profileTable.id, id));
     }
   };
 }

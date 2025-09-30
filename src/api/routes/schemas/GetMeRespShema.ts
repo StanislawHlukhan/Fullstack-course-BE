@@ -8,5 +8,10 @@ export const GetMeRespSchema = z.object({
   dickSize: z.number(),
   createdAt: z.date(),
   id: z.string().uuid(),
-  systemRole: z.nativeEnum(ESystemRole)
+  systemRole: z.nativeEnum(ESystemRole),
+  subscription: z.object({
+    name: z.string(),
+    expiresAt: z.date(),
+    customerPortalUrl: z.string().url().optional()
+  }).nullable().optional()
 });;

@@ -14,4 +14,5 @@ export interface IProfileRepo {
   updateDeletedAt(id: string, deletedAt: Date | null, tx?: unknown): Promise<void>;
   hardDeleteProfile(id: string, tx?: unknown): Promise<void>;
   getSoftDeletedProfiles(): Promise<Profile[]>;
+  updateStripeCustomerId(id: string, stripeCustomerId: string): Promise<void>;
 }
