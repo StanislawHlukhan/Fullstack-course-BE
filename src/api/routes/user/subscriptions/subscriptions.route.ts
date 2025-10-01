@@ -1,9 +1,9 @@
 import { FastifyPluginAsync } from 'fastify';
 import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { stripeService } from 'src/services/stripe/stripe.service';
 import { GetPricingPlansResSchema } from '../../schemas/GetPricingPlansResSchema';
 import { changeSubscription } from 'src/controllers/subscriptions/change-subscription';
+import { createCheckoutSession } from 'src/controllers/subscriptions/create-checkout-session';
 import { GetCheckoutSessionRespSchema } from '../../schemas/GetCheckoutSessionRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
@@ -30,18 +30,12 @@ const routes: FastifyPluginAsync = async function (f) {
       }
     }
   }, async (req) => {
-
-    const profile = await fastify.repos.profileRepo.getProfileById(req.profile!.id);
-
-    let customerId = profile?.stripeCustomerId || null;
-    if (!customerId) {
-      const customer = await stripeService.createCustomer(profile!.email);
-      customerId = customer.id;
-      await fastify.repos.profileRepo.updateStripeCustomerId(req.profile!.id, customerId);
-    }
-
-    const session = await stripeService.createCheckoutSession(customerId, req.body.priceId, req.profile!.id);
-    return { id: session.id, url: session.url! };
+    return await createCheckoutSession({
+      profileRepo: fastify.repos.profileRepo,
+      userId: req.profile!.id,
+      userEmail: req.profile!.email,
+      priceId: req.body.priceId
+    });
   });
   
   fastify.patch('/change-subscription', {
