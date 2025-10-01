@@ -10,6 +10,11 @@
 6. Start the server with command npm run local
 7. To open drizzle.studio use command npm run db:migration:studio
 
+
+## Local usage
+
+npm run seed:pricing-plans - to insert pricing plans to db
+
 ## Stripe Integration
 
 This project implements a comprehensive Stripe subscription system with the following features:
@@ -33,7 +38,6 @@ STRIPE_WEBHOOK_SECRET=whsec_...        # Webhook endpoint secret
 FRONTEND_URL=http://localhost:3000     # Frontend URL for redirects
 ```
 
-### Architecture
 
 #### Services
 - **StripeService** (`src/services/stripe/stripe.service.ts`): Core Stripe API wrapper

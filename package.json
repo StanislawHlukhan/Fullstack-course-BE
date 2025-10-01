@@ -12,7 +12,8 @@
     "lint:fix": "eslint --fix .",
     "db:migration:run": "npx drizzle-kit migrate",
     "db:migration:generate": "npx drizzle-kit generate",
-    "db:migration:studio": "npx drizzle-kit studio"
+    "db:migration:studio": "npx drizzle-kit studio",
+    "seed:pricing-plans": "ts-node -r tsconfig-paths/register src/common/scripts/seed:add-pricing-plans.ts"
   },
   "keywords": [],
   "author": "",
