@@ -31,6 +31,8 @@ const routes: FastifyPluginAsync = async function (f) {
      const result = await getPosts({
       postRepo: fastify.repos.postRepo,
       options: {
+        // CODE REVIVE: В тебе і так тип ддя req.query.limit буде number | undefined, це прописано в схемі
+        // тому не потрібно використовувати || undefined
         limit: req.query.limit || undefined,
         page: req.query.page || undefined,
         search: req.query.search,

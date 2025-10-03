@@ -26,6 +26,7 @@ export async function getHardDeletedUsers(params: {
     const createdAt = u.createdAt ? new Date(u.createdAt) : new Date();
     const activatedAt = u.activatedAt ? new Date(u.activatedAt) : null;
     const deletedAt = a.createdAt ? new Date(a.createdAt) : null;
+    // CODE REVIEW: старайся уникати мап в мапі. Спробуй знайти інший спосіб зробити це без мапів. 
     const postsRaw = (a.postsData as any[] || []).map(p => PostSchema.parse({
       ...p,
       createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),

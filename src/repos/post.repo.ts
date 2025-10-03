@@ -59,6 +59,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       const postsWithCommentsAndProfile = await db
         .select({
           post: postTable,
+          // CODE REVIEW: ти можеш використати getTableColumns щоб не вказувати кожну колонку.
           comments: jsonAggBuildObject({
             id: commentTable.id,
             postId: commentTable.postId,
@@ -68,6 +69,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
             createdBy: commentTable.createdBy,
             deletedAt: commentTable.deletedAt
           }),
+          // CODE REVIEW: В тебе може бути лише 1 профайл в поста. Не треба використовувати jsonAggBuildObject
           profile: jsonAggBuildObject({
             id: profileTable.id,
             name: profileTable.name,
@@ -107,7 +109,10 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         .orderBy(order(options?.sortBy === 'title' ? postTable.title : options?.sortBy === 'commentCount' ? count(commentTable.id) : postTable.createdAt))
         .limit(limit)
         .offset(offset);
-
+        
+    // CODE REVIEW: Цей мап не ефективний, він сповільнює час респонсу відсотків 25%. 
+    // Ти парсиш коден рядок окремо. Замість цього краще парсити все разом.
+    // Щоб не робити перетворення строки в дату, ти можеш використати z.coerce в схемі. Тоді твоя схема автоматично буде це робити
       const posts = postsWithCommentsAndProfile.map(row => {
         const comments = row.comments || [];
         return PostWithProfileSchema.parse({

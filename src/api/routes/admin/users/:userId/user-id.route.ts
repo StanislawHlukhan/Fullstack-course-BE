@@ -61,6 +61,7 @@ const routes: FastifyPluginAsync = async function (f) {
       commentRepo: fastify.repos.commentRepo,
       archiveRepo: fastify.repos.archiveRepo,
       tagToPostRepo: fastify.repos.tagToPostRepo,
+      // CODE REVIVE: getTransactionManager має бути зареєстрований в api.ts і викликатись з fastify.transactionManager
       transactionManager: getTransactionManager(fastify.db),
       userId: req.params.userId
     });

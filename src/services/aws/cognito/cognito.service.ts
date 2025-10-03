@@ -11,9 +11,10 @@ export function getAWSCognitoService(region: string): IIdentityService {
   });
 
   return {
-
     async toggleUserAccount(subId, value) {
       try {
+        // CODE REVIEW: в тебе має бути 2 окремі методи для adminEnableUser та adminDisableUser.
+        // якщо обʼєднати їх в один, то вже це бізнес логіка, а вона має бути в контролері а не в сервісі.
         if (value) {
           await client.adminEnableUser({
             UserPoolId: process.env.AWS_USER_POOL_ID,

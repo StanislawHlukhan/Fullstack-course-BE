@@ -4,6 +4,7 @@ import { PostSchema } from 'src/types/Post';
 import { CommentSchema } from 'src/types/Comment';
 import { TagSchema } from 'src/types/Tag';
 
+// CODE REVIEW: один файл - одна схема
 export const TagLinkSchema = z.object({
   postId: z.string().uuid(),
   tagId: z.string().uuid()
