@@ -119,6 +119,7 @@ async function run() {
     routeParams: true
   });
   await server.ready();
+  console.log(process.env.PORT, process.env.HOST);
   await server.listen({
     port: parseInt(process.env.PORT || ''),
     host: process.env.HOST || ''

@@ -12,6 +12,6 @@ export default defineConfig({
     password: process.env.PGPASSWORD!,
     user: process.env.PGUSERNAME!,
     database: process.env.PGDATABASE!,
-    ssl: false
+    ssl: { rejectUnauthorized: false }
   }
 });
