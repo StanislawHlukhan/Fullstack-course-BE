@@ -6,7 +6,7 @@
   "scripts": {
     "local": "nodemon -r tsconfig-paths/register src/api/api.ts",
     "local:env": "docker compose -f docker-compose.local.yml up",
-    "build": "rm -R -f dist && tsc -p tsconfig.build.json",
+    "build": "rm -R -f dist && npx tsc -p tsconfig.build.json",
     "production": "TS_NODE_BASEURL=dist node -r tsconfig-paths/register dist/src/api/api.js",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
@@ -38,6 +38,7 @@
     "resend": "^6.0.2",
     "stripe": "^18.5.0",
     "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.3",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -49,7 +50,6 @@
     "nodemon": "^3.1.9",
     "pino-pretty": "^13.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3",
     "typescript-eslint": "^8.21.0"
   },
   "engines": {
