@@ -26,8 +26,5 @@ export async function getSoftDeletedUsers(params: {
       };
   });
 
-  if(!result.length) {
-    throw new Error('No soft deleted users found');
-  }
   return { users: result, total: result.length };
 }

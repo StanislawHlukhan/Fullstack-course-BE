@@ -5,9 +5,9 @@ import { createPost } from 'src/controllers/post/create-post';
 import { CreatePostReqSchema } from '../../schemas/CreatePostReqSchema';
 import { z } from 'zod';
 import { getSoftDeletedPosts } from 'src/controllers/post/get-soft-deleted-posts';
-import { GetPostsRespSchema } from '../../schemas/GetPostsRespShema';
-import { GetPostRespSchema } from 'src/api/routes/schemas/GetPostRespShema';
-import { GetSoftDeletedPostsRespSchema } from 'src/api/routes/schemas/GetSoftDeletedPostsRespShema';
+import { GetPostsRespSchema } from '../../schemas/GetPostsRespSchema';
+import { GetPostRespSchema } from 'src/api/routes/schemas/GetPostRespSchema';
+import { GetSoftDeletedPostsRespSchema } from 'src/api/routes/schemas/GetSoftDeletedPostsRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -31,13 +31,13 @@ const routes: FastifyPluginAsync = async function (f) {
      const result = await getPosts({
       postRepo: fastify.repos.postRepo,
       options: {
-        limit: req.query.limit || undefined,
-        page: req.query.page || undefined,
+        limit: req.query.limit,
+        page: req.query.page,
         search: req.query.search,
         sortBy: req.query.sortBy || undefined,
         sortOrder: req.query.sortOrder || undefined,
-        commentCount: req.query.commentCount || undefined,
-        tagIds: req.query.tagIds || undefined
+        commentCount: req.query.commentCount,
+        tagIds: req.query.tagIds
       }
     });
 

@@ -5,20 +5,25 @@ import { TagSchema } from 'src/types/Tag';
 
 export async function getHardDeletedUsers(params: {
   repos: IRepos;
-}): Promise<{ users: Array<{
-  id: string;
-  email: string;
-  name: string;
-  dickSize: number;
-  createdAt: Date;
-  isEnabled?: boolean;
-  activatedAt?: Date | null;
-  deletedAt?: Date | null;
-  posts?: Array<ReturnType<typeof PostSchema.parse> & {
-    tags?: ReturnType<typeof TagSchema.parse>[];
-    comments?: ReturnType<typeof CommentSchema.parse>[];
+}): Promise<{
+  users: Array<{
+    id: string;
+    email: string;
+    name: string;
+    dickSize: number;
+    createdAt: Date;
+    isEnabled?: boolean;
+    activatedAt?: Date | null;
+    deletedAt?: Date | null;
+    posts?: Array<
+      ReturnType<typeof PostSchema.parse> & {
+        tags?: ReturnType<typeof TagSchema.parse>[];
+        comments?: ReturnType<typeof CommentSchema.parse>[];
+      }
+    >;
   }>;
-}>; total: number }> {
+  total: number;
+}> {
   const archives = await params.repos.archiveRepo.getArchivedUsers();
 
   const users = archives.map(a => {
@@ -26,47 +31,43 @@ export async function getHardDeletedUsers(params: {
     const createdAt = u.createdAt ? new Date(u.createdAt) : new Date();
     const activatedAt = u.activatedAt ? new Date(u.activatedAt) : null;
     const deletedAt = a.createdAt ? new Date(a.createdAt) : null;
-    const postsRaw = (a.postsData as any[] || []).map(p => PostSchema.parse({
-      ...p,
-      createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
-      updatedAt: p.updatedAt ? new Date(p.updatedAt) : new Date(),
-      deletedAt: p.deletedAt ? new Date(p.deletedAt) : null
-    }));
 
-    const commentsRaw = (a.commentsData as any[] || []).map(c => CommentSchema.parse({
-      ...c,
-      createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
-      updatedAt: c.updatedAt ? new Date(c.updatedAt) : new Date(),
-      deletedAt: c.deletedAt ? new Date(c.deletedAt) : null
-    }));
+    const postsData = (a.postsData as any[]) || [];
+    const commentsData = (a.commentsData as any[]) || [];
+    const tagsData = (a.tagsData as any[]) || [];
 
-    const tagsRaw = (a.tagsData as any[] || []).map(t => TagSchema.parse({
-      id: t.id,
-      name: t.name,
-      createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
-      updatedAt: t.updatedAt ? new Date(t.updatedAt) : new Date()
-    }));
-
-    const postIdToTags = new Map<string, ReturnType<typeof TagSchema.parse>[]>();
-    for (const t of (a.tagsData as any[] || [])) {
-      const list = postIdToTags.get(t.postId) || [];
-      const tag = tagsRaw.find(x => x.id === t.id);
-      if (tag) { list.push(tag); }
-      postIdToTags.set(t.postId, list);
+    const commentsByPost: Record<string, ReturnType<typeof CommentSchema.parse>[]> = {};
+    for (const c of commentsData) {
+      const parsed = CommentSchema.parse({
+        ...c,
+        createdAt: new Date(c.createdAt ?? Date.now()),
+        updatedAt: new Date(c.updatedAt ?? Date.now()),
+        deletedAt: c.deletedAt ? new Date(c.deletedAt) : null
+      });
+      (commentsByPost[c.postId] ||= []).push(parsed);
     }
 
-    const postIdToComments = new Map<string, ReturnType<typeof CommentSchema.parse>[]>();
-    for (const c of commentsRaw) {
-      const list = postIdToComments.get(c.postId) || [];
-      list.push(c);
-      postIdToComments.set(c.postId, list);
+    const tagsByPost: Record<string, ReturnType<typeof TagSchema.parse>[]> = {};
+    for (const t of tagsData) {
+      const parsed = TagSchema.parse({
+        id: t.id,
+        name: t.name,
+        createdAt: new Date(t.createdAt ?? Date.now()),
+        updatedAt: new Date(t.updatedAt ?? Date.now())
+      });
+      (tagsByPost[t.postId] ||= []).push(parsed);
     }
 
-    const posts = postsRaw.map(p => ({
-      ...p,
-      tags: postIdToTags.get(p.id) || [],
-      comments: postIdToComments.get(p.id) || []
-    }));
+    const posts = postsData.map(p =>
+      PostSchema.parse({
+        ...p,
+        createdAt: new Date(p.createdAt ?? Date.now()),
+        updatedAt: new Date(p.updatedAt ?? Date.now()),
+        deletedAt: p.deletedAt ? new Date(p.deletedAt) : null,
+        tags: tagsByPost[p.id] || [],
+        comments: commentsByPost[p.id] || []
+      })
+    );
 
     return {
       id: u.id || a.archivedUserId,
@@ -80,7 +81,6 @@ export async function getHardDeletedUsers(params: {
       posts
     };
   });
-  
+
   return { users, total: users.length };
 }
-

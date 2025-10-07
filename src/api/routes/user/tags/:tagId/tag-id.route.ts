@@ -3,7 +3,7 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { CreateTagReqSchema } from 'src/api/routes/schemas/CreateTagReqSchema';
 import { deleteTag } from 'src/controllers/tags/delete-tag';
 import { updateTag } from 'src/controllers/tags/update-tag';
-import { GetTagRespSchema } from 'src/api/routes/schemas/GetTagRespShema';
+import { GetTagRespSchema } from 'src/api/routes/schemas/GetTagRespSchema';
 import { z } from 'zod';
 
 const routes: FastifyPluginAsync = async function (f) {

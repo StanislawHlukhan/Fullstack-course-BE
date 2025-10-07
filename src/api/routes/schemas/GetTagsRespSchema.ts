@@ -1,4 +1,4 @@
 import { z } from 'zod';
-import { GetTagRespSchema } from './GetTagRespShema';
+import { GetTagRespSchema } from './GetTagRespSchema';
 
 export const GetTagsRespSchema = z.array(GetTagRespSchema);

@@ -41,6 +41,8 @@ export async function hardRestoreUser(params: {
 
     // Restore posts
     if (postsData.length > 0) {
+      // CODE REVIEW: Уникай виконання запитів в базу в циклах, особливо в транзакції. 
+      // Для того щоб створити пости усі за один раз, треба зробити bulk insert.
       for (const p of postsData) {
         const newPost = await params.postRepo.createPost({
           title: p.title,
@@ -52,6 +54,7 @@ export async function hardRestoreUser(params: {
     }
 
     if (commentsData.length > 0) {
+      // CODE REVIEW: The same
       for (const c of commentsData) {
         const newPostId = oldToNewPostId[c.postId];
         if (!newPostId) {
@@ -73,6 +76,7 @@ export async function hardRestoreUser(params: {
     }
 
     if (tagsData.length > 0) {
+      // CODE REVIEW: The same
       const tagsByPost: Record<string, string[]> = {};
       for (const t of tagsData as any[]) {
         const newPostId = oldToNewPostId[t.postId];
@@ -92,6 +96,7 @@ export async function hardRestoreUser(params: {
         tagsByPost[newPostId].push(t.id);
       }
       
+      // CODE REVIEW: The same
       for (const [postId, tagIds] of Object.entries(tagsByPost)) {
         await params.tagToPostRepo.addTagsToPost(postId, tagIds, ctx.sharedTx);
       }

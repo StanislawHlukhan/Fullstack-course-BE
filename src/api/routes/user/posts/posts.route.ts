@@ -5,7 +5,7 @@ import { createPost } from 'src/controllers/post/create-post';
 import { PostSchema } from 'src/types/Post';
 import { z } from 'zod';
 import { CreatePostReqSchema } from '../../schemas/CreatePostReqSchema';
-import { GetPostsRespSchema } from '../../schemas/GetPostsRespShema';
+import { GetPostsRespSchema } from '../../schemas/GetPostsRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -29,13 +29,13 @@ const routes: FastifyPluginAsync = async function (f) {
      const result = await getPosts({
       postRepo: fastify.repos.postRepo,
       options: {
-        limit: req.query.limit || undefined,
-        page: req.query.page || undefined,
+        limit: req.query.limit,
+        page: req.query.page,
         search: req.query.search,
         sortBy: req.query.sortBy || undefined,
         sortOrder: req.query.sortOrder || undefined,
-        commentCount: req.query.commentCount || undefined,
-        tagIds: req.query.tagIds || undefined
+        commentCount: req.query.commentCount,
+        tagIds: req.query.tagIds
       }
     });
 

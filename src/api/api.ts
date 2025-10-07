@@ -22,6 +22,7 @@ import { getAWSCognitoService } from 'src/services/aws/cognito/cognito.service';
 import { getMailService } from 'src/services/sendgrid/sendgrid.service';
 import { getAWSKMSService } from 'src/services/kms/kms.service';
 import fastifyRawBody from 'fastify-raw-body';
+import { getTransactionManager } from 'src/services/drizzle/drizzle.service';
 
 async function run() {
   const server = fastify({
@@ -71,18 +72,17 @@ async function run() {
     'identityService',
     getAWSCognitoService(process.env.AWS_REGION!)
   );
-  
-  server.decorate(
-    'db',
-    getDb({
-      host: process.env.PGHOST || '',
-      port: parseInt(process.env.PGPORT || ''),
-      db: process.env.PGDATABASE || '',
-      user: process.env.PGUSERNAME || '',
-      pwd: process.env.PGPASSWORD || '',
-      logsEnabled: process.env.NODE_ENV == 'local'
-    })
-  );
+  const db = getDb({
+    host: process.env.PGHOST || '',
+    port: parseInt(process.env.PGPORT || ''),
+    db: process.env.PGDATABASE || '',
+    user: process.env.PGUSERNAME || '',
+    pwd: process.env.PGPASSWORD || '',
+    logsEnabled: process.env.NODE_ENV == 'local'
+  });
+  server.decorate('db', db);
+  server.decorate('transactionManager', getTransactionManager(db));
+
   server.decorate('repos', getRepos(server.db));
 
   server.register(autoTagging);
