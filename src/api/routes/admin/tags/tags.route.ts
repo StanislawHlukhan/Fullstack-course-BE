@@ -3,9 +3,8 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { createTag } from 'src/controllers/tags/create-tag';
 import { getTags } from 'src/controllers/tags/get-tags';
 import { CreateTagReqSchema } from '../../schemas/CreateTagReqSchema';
-// CODE REVIVE: spelling: must be Schema not Shema 
-import { GetTagsRespSchema } from '../../schemas/GetTagsRespShema';
-import { GetTagRespSchema } from '../../schemas/GetTagRespShema';
+import { GetTagsRespSchema } from '../../schemas/GetTagsRespSchema';
+import { GetTagRespSchema } from '../../schemas/GetTagRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();

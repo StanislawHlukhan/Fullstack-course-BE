@@ -9,7 +9,6 @@ import { PostWithProfileSchema } from 'src/types/PostWithProfile';
 import { hardDeleteUser } from 'src/controllers/users/hard-delete-user';
 import { hardRestoreUser } from 'src/controllers/users/hard-restore-user';
 import { getPostsByProfileId } from 'src/controllers/post/get-posts-by-profile-id';
-import { getTransactionManager } from 'src/services/drizzle/drizzle.service';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -61,8 +60,7 @@ const routes: FastifyPluginAsync = async function (f) {
       commentRepo: fastify.repos.commentRepo,
       archiveRepo: fastify.repos.archiveRepo,
       tagToPostRepo: fastify.repos.tagToPostRepo,
-      // CODE REVIVE: getTransactionManager має бути зареєстрований в api.ts і викликатись з fastify.transactionManager
-      transactionManager: getTransactionManager(fastify.db),
+      transactionManager: fastify.transactionManager,
       userId: req.params.userId
     });
   });
@@ -80,7 +78,7 @@ const routes: FastifyPluginAsync = async function (f) {
       commentRepo: fastify.repos.commentRepo,
       archiveRepo: fastify.repos.archiveRepo,
       tagToPostRepo: fastify.repos.tagToPostRepo,
-      transactionManager: getTransactionManager(fastify.db),
+      transactionManager: fastify.transactionManager,
       userId: req.params.userId
     });
   });
@@ -96,7 +94,7 @@ const routes: FastifyPluginAsync = async function (f) {
       profileRepo: fastify.repos.profileRepo,
       postRepo: fastify.repos.postRepo,
       commentRepo: fastify.repos.commentRepo,
-      transactionManager: getTransactionManager(fastify.db),
+      transactionManager: fastify.transactionManager,
       identityService: fastify.identityService,
       id: req.params.userId
     });
@@ -113,7 +111,7 @@ const routes: FastifyPluginAsync = async function (f) {
       profileRepo: fastify.repos.profileRepo,
       postRepo: fastify.repos.postRepo,
       commentRepo: fastify.repos.commentRepo,
-      transactionManager: getTransactionManager(fastify.db),
+      transactionManager: fastify.transactionManager,
       identityService: fastify.identityService,
       id: req.params.userId
     });

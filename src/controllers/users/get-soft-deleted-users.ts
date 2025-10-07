@@ -26,10 +26,5 @@ export async function getSoftDeletedUsers(params: {
       };
   });
 
-  // CODE REVIEW: Коли гетаєш шось в кількості, не треба робити throw new Error якщо нічого не знайшлось.
-  // Тому що результат може бути пустим масивом
-  if(!result.length) {
-    throw new Error('No soft deleted users found');
-  }
   return { users: result, total: result.length };
 }

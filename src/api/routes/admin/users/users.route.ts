@@ -24,10 +24,9 @@ const routes: FastifyPluginAsync = async function (f) {
     const users = await getUsers({
       profileRepo: fastify.repos.profileRepo,
       identityService: fastify.identityService,
-      // CODE REVIVE: the same as in posts.route.ts
-      limit: req.query.limit || undefined,
-      page: req.query.page || undefined,
-      search: req.query.search || undefined
+      limit: req.query.limit,
+      page: req.query.page,
+      search: req.query.search
     });
     return users;
   });

@@ -7,8 +7,7 @@ import { addTagToPost } from 'src/controllers/tags/add-tag-to-post';
 import { removeTagFromPost } from 'src/controllers/tags/remove-tag-from-post';
 import { softDeletePost } from 'src/controllers/post/soft-delete-post';
 import { softRestorePost } from 'src/controllers/post/soft-restore-post';
-import { getTransactionManager } from 'src/services/drizzle/drizzle.service';
-import { GetPostRespSchema } from 'src/api/routes/schemas/GetPostRespShema';
+import { GetPostRespSchema } from 'src/api/routes/schemas/GetPostRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
@@ -96,7 +95,7 @@ const routes: FastifyPluginAsync = async function (f) {
     const post = await softDeletePost({
       postRepo: fastify.repos.postRepo,
       commentRepo: fastify.repos.commentRepo,
-      transactionManager: getTransactionManager(fastify.db),
+      transactionManager: fastify.transactionManager,
       id: req.params.postId
     });
 
@@ -118,7 +117,7 @@ const routes: FastifyPluginAsync = async function (f) {
     const post = await softRestorePost({
       postRepo: fastify.repos.postRepo,
       commentRepo: fastify.repos.commentRepo,
-      transactionManager: getTransactionManager(fastify.db),
+      transactionManager: fastify.transactionManager,
       id: req.params.postId
     });
 

@@ -4,8 +4,8 @@ import { createComment } from 'src/controllers/comment/create-comment';
 import { z } from 'zod';
 import { getCommentsByPostId } from 'src/controllers/comment/get-comments-by-post-id';
 import { CreateCommentReqSchema } from 'src/api/routes/schemas/CreateCommentReqSchema';
-import { GetCommentRespSchema } from 'src/api/routes/schemas/GetCommentRespShema';
-import { GetCommentsRespSchema } from 'src/api/routes/schemas/GetCommentsRespShema';
+import { GetCommentRespSchema } from 'src/api/routes/schemas/GetCommentRespSchema';
+import { GetCommentsRespSchema } from 'src/api/routes/schemas/GetCommentsRespSchema';
 
 const routes: FastifyPluginAsync = async function (f) {
   const fastify = f.withTypeProvider<ZodTypeProvider>();
