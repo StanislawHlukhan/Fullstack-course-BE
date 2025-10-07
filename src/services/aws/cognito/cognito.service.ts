@@ -11,21 +11,23 @@ export function getAWSCognitoService(region: string): IIdentityService {
   });
 
   return {
-    async toggleUserAccount(subId, value) {
+    async adminEnableUser(subId) {
       try {
-        // CODE REVIEW: в тебе має бути 2 окремі методи для adminEnableUser та adminDisableUser.
-        // якщо обʼєднати їх в один, то вже це бізнес логіка, а вона має бути в контролері а не в сервісі.
-        if (value) {
-          await client.adminEnableUser({
-            UserPoolId: process.env.AWS_USER_POOL_ID,
-            Username: subId
-          });
-        } else {
-          await client.adminDisableUser({
-            UserPoolId: process.env.AWS_USER_POOL_ID,
-            Username: subId
-          });
-        }
+        await client.adminEnableUser({
+          UserPoolId: process.env.AWS_USER_POOL_ID,
+          Username: subId
+        });
+      } catch (err) {
+        throw new ApplicationError(`Cognito error - ${err}`);
+      }
+    },
+
+    async adminDisableUser(subId) {
+      try {
+        await client.adminDisableUser({
+          UserPoolId: process.env.AWS_USER_POOL_ID,
+          Username: subId
+        });
       } catch (err) {
         throw new ApplicationError(`Cognito error - ${err}`);
       }

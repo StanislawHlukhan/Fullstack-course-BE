@@ -20,6 +20,15 @@ export const getCommentRepo = (db: NodePgDatabase): ICommentRepo => {
       return CommentSchema.parse(comment[0]);
     },
 
+    async createComments(commentsData, tx?: unknown){
+      const conn = (tx || db) as NodePgDatabase;
+      if (commentsData.length === 0) {
+        return [];
+      }
+      const comments = await conn.insert(commentTable).values(commentsData as Comment[]).returning();
+      return CommentSchema.array().parse(comments);
+    },
+
    async updateCommentByIdAndPostId(id, postId, commentData){
     const comment = await db.update(commentTable).set(commentData)
     .where(and(eq(commentTable.id, id), eq(commentTable.postId, postId))).returning();

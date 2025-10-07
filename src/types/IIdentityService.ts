@@ -5,5 +5,6 @@ export interface IIdentityService {
   createUser(email: string, name: string): Promise<IdentityUser>;
   setPassword(subId: string, password: string): Promise<void>;
   getUsers(subIds: string[]): Promise<IdentityUser[]>;
-  toggleUserAccount(subId: string, value: boolean): Promise<void>;
+  adminEnableUser(subId: string): Promise<void>;
+  adminDisableUser(subId: string): Promise<void>;
 }

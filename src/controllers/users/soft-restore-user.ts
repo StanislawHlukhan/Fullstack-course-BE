@@ -12,8 +12,7 @@ export async function softRestoreUser(params: {
   identityService: IIdentityService,
   id: string
 }) {
-  // CODE REVIEW: те саме що і soft-delete-user
-  return await params.transactionManager.execute(async (ctx) => {
+  const result = await params.transactionManager.execute(async (ctx) => {
     const profile = await params.profileRepo.getProfileById(params.id, ctx.sharedTx);
 
     if (!profile?.deletedAt) {
@@ -23,6 +22,9 @@ export async function softRestoreUser(params: {
     await params.postRepo.updateDeletedAt(params.id, null, ctx.sharedTx);
     await params.commentRepo.updateDeletedAt(params.id, null, ctx.sharedTx);
     await params.profileRepo.updateDeletedAt(params.id, null, ctx.sharedTx);
-    await params.identityService.toggleUserAccount(profile!.subId, true);
+    
+    return profile;
   });
+  
+  await params.identityService.adminEnableUser(result.subId);
 }
