@@ -41,52 +41,49 @@ export async function hardRestoreUser(params: {
 
     // Restore posts
     if (postsData.length > 0) {
-      // CODE REVIEW: Уникай виконання запитів в базу в циклах, особливо в транзакції. 
-      // Для того щоб створити пости усі за один раз, треба зробити bulk insert.
-      for (const p of postsData) {
-        const newPost = await params.postRepo.createPost({
-          title: p.title,
-          description: p.description,
-          createdBy: newProfile.id
-        }, ctx.sharedTx);
-        oldToNewPostId[p.id] = newPost.id;
-      }
+      const postsToCreate = postsData.map(p => ({
+        title: p.title,
+        description: p.description,
+        createdBy: newProfile.id
+      }));
+      
+      const newPosts = await params.postRepo.createPosts(postsToCreate, ctx.sharedTx);
+      
+      // Map old IDs to new IDs
+      postsData.forEach((p, index) => {
+        oldToNewPostId[p.id] = newPosts[index].id;
+      });
     }
 
     if (commentsData.length > 0) {
-      // CODE REVIEW: The same
-      for (const c of commentsData) {
-        const newPostId = oldToNewPostId[c.postId];
-        if (!newPostId) {
-          continue;
-        }
-        
-        try {
-          await params.postRepo.getPostById(newPostId, ctx.sharedTx);
-        } catch (_error) {
-          continue;
-        }
-        
-        const createdBy = c.createdBy === params.userId ? newProfile.id : c.createdBy;
-        await params.commentRepo.createComment({
-          text: c.text,
-          createdBy
-        }, newPostId, ctx.sharedTx);
+      const commentsToCreate = commentsData
+        .map(c => {
+          const newPostId = oldToNewPostId[c.postId];
+          if (!newPostId) {
+            return null;
+          }
+          
+          const createdBy = c.createdBy === params.userId ? newProfile.id : c.createdBy;
+          return {
+            text: c.text,
+            createdBy,
+            postId: newPostId
+          };
+        })
+        .filter((comment): comment is NonNullable<typeof comment> => comment !== null);
+      
+      if (commentsToCreate.length > 0) {
+        await params.commentRepo.createComments(commentsToCreate, ctx.sharedTx);
       }
     }
 
     if (tagsData.length > 0) {
-      // CODE REVIEW: The same
       const tagsByPost: Record<string, string[]> = {};
+      
+      // Group tags by post ID
       for (const t of tagsData as any[]) {
         const newPostId = oldToNewPostId[t.postId];
         if (!newPostId) {
-          continue;
-        }
-        
-        try {
-          await params.postRepo.getPostById(newPostId, ctx.sharedTx);
-        } catch (_error) {
           continue;
         }
         
@@ -96,9 +93,13 @@ export async function hardRestoreUser(params: {
         tagsByPost[newPostId].push(t.id);
       }
       
-      // CODE REVIEW: The same
-      for (const [postId, tagIds] of Object.entries(tagsByPost)) {
-        await params.tagToPostRepo.addTagsToPost(postId, tagIds, ctx.sharedTx);
+      // Add tags to posts in bulk
+      const tagOperations = Object.entries(tagsByPost).map(([postId, tagIds]) => 
+        params.tagToPostRepo.addTagsToPost(postId, tagIds, ctx.sharedTx)
+      );
+      
+      if (tagOperations.length > 0) {
+        await Promise.all(tagOperations);
       }
     }
 

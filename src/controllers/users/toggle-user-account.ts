@@ -12,5 +12,9 @@ export async function toggleUserAccount(params: {
     throw new Error('Profile not found');
   }
 
-  await params.identityService.toggleUserAccount(profile.subId, params.value);
+  if (params.value) {
+    await params.identityService.adminEnableUser(profile.subId);
+  } else {
+    await params.identityService.adminDisableUser(profile.subId);
+  }
 }

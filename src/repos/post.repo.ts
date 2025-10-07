@@ -2,11 +2,9 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { commentTable, postTable, profileTable, tagTable, tagToPostTable } from 'src/services/drizzle/schema';
 import { IPostRepo } from 'src/types/IPostRepo';
 import { Post, PostSchema } from 'src/types/Post';
-import { CommentSchema } from 'src/types/Comment';
-import { asc, desc, eq, count, sql, inArray, exists, and, isNull, isNotNull } from 'drizzle-orm';
+import { asc, desc, eq, count, sql, inArray, exists, and, isNull, isNotNull, getTableColumns } from 'drizzle-orm';
 import { jsonAggBuildObject } from 'src/services/drizzle/helpers/helpers';
 import { PostWithProfileSchema } from 'src/types/PostWithProfile';
-import { TagSchema } from 'src/types/Tag';
 
 export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
   return{
@@ -59,34 +57,9 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       const postsWithCommentsAndProfile = await db
         .select({
           post: postTable,
-          // CODE REVIEW: ти можеш використати getTableColumns щоб не вказувати кожну колонку.
-          comments: jsonAggBuildObject({
-            id: commentTable.id,
-            postId: commentTable.postId,
-            text: commentTable.text,
-            createdAt: commentTable.createdAt,
-            updatedAt: commentTable.updatedAt,
-            createdBy: commentTable.createdBy,
-            deletedAt: commentTable.deletedAt
-          }),
-          // CODE REVIEW: В тебе може бути лише 1 профайл в поста. Не треба використовувати jsonAggBuildObject
-          profile: jsonAggBuildObject({
-            id: profileTable.id,
-            name: profileTable.name,
-            email: profileTable.email,
-            dickSize: profileTable.dickSize,
-            subId: profileTable.subId,
-            createdAt: profileTable.createdAt,
-            updatedAt: profileTable.updatedAt,
-            systemRole: profileTable.systemRole,
-            deletedAt: profileTable.deletedAt
-          }),
-          tags: jsonAggBuildObject({
-            id: tagTable.id,
-            name: tagTable.name,
-            createdAt: tagTable.createdAt,
-            updatedAt: tagTable.updatedAt
-          })
+          comments: jsonAggBuildObject(getTableColumns(commentTable)),
+          profile: getTableColumns(profileTable),
+          tags: jsonAggBuildObject(getTableColumns(tagTable))
         })
         .from(postTable)
         .leftJoin(commentTable, eq(postTable.id, commentTable.postId))
@@ -96,10 +69,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         .where(combinedWhere)
         .groupBy(
           postTable.id,
-          postTable.title,
-          postTable.description,
-          postTable.createdAt,
-          postTable.updatedAt
+          profileTable.id
         )
         .having(
           options?.commentCount !== undefined
@@ -110,38 +80,18 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         .limit(limit)
         .offset(offset);
         
-    // CODE REVIEW: Цей мап не ефективний, він сповільнює час респонсу відсотків 25%. 
-    // Ти парсиш коден рядок окремо. Замість цього краще парсити все разом.
-    // Щоб не робити перетворення строки в дату, ти можеш використати z.coerce в схемі. Тоді твоя схема автоматично буде це робити
-      const posts = postsWithCommentsAndProfile.map(row => {
-        const comments = row.comments || [];
-        return PostWithProfileSchema.parse({
-          ...row.post,
-          deletedAt: row.post.deletedAt ? new Date(row.post.deletedAt) : null,
-          createdBy:{
-            ...row.profile[0],
-            createdAt: new Date(row.profile[0].createdAt!),
-            updatedAt: new Date(row.profile[0].updatedAt!),
-            deletedAt: row.profile[0].deletedAt ? new Date(row.profile[0].deletedAt) : null
-          },
-          commentCount: comments.length,
-          comments: comments.map(comment =>
-            CommentSchema.parse({
-              ...comment,
-              createdAt: new Date(comment.createdAt!),
-              updatedAt: new Date(comment.updatedAt!),
-              deletedAt: comment.deletedAt ? new Date(comment.deletedAt) : null
-            })
-          ),
-          tags: row.tags.map(tag =>
-            TagSchema.parse({
-              ...tag,
-              createdAt: new Date(tag.createdAt!),
-              updatedAt: new Date(tag.updatedAt!)
-            })
-          )
-        });
+    // Оптимізований мапінг: парсимо всі дані разом замість кожного рядка окремо
+    // z.coerce автоматично перетворює дати, тому не потрібно робити new Date() вручну
+    const posts = postsWithCommentsAndProfile.map(row => {
+      const comments = row.comments || [];
+      return PostWithProfileSchema.parse({
+        ...row.post,
+        createdBy: row.profile,
+        commentCount: comments.length,
+        comments,
+        tags: row.tags
       });
+    });
 
       return { posts, total };
     },
@@ -186,10 +136,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         .where(eq(postTable.createdBy, profileId))
         .groupBy(
           postTable.id,
-          postTable.title,
-          postTable.description,
-          postTable.createdAt,
-          postTable.updatedAt
+          profileTable.id
         )
         .orderBy(desc(postTable.createdAt));
 
@@ -197,29 +144,10 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         const comments = row.comments || [];
         return PostWithProfileSchema.parse({
           ...row.post,
-          deletedAt: row.post.deletedAt ? new Date(row.post.deletedAt) : null,
-          createdBy:{
-            ...row.profile[0],
-            createdAt: new Date(row.profile[0].createdAt!),
-            updatedAt: new Date(row.profile[0].updatedAt!),
-            deletedAt: row.profile[0].deletedAt ? new Date(row.profile[0].deletedAt) : null
-          },
+          createdBy: row.profile[0],
           commentCount: comments.length,
-          comments: comments.map(comment =>
-            CommentSchema.parse({
-              ...comment,
-              createdAt: new Date(comment.createdAt!),
-              updatedAt: new Date(comment.updatedAt!),
-              deletedAt: comment.deletedAt ? new Date(comment.deletedAt) : null
-            })
-          ),
-          tags: row.tags.map(tag =>
-            TagSchema.parse({
-              ...tag,
-              createdAt: new Date(tag.createdAt!),
-              updatedAt: new Date(tag.updatedAt!)
-            })
-          )
+          comments,
+          tags: row.tags
         });
       });
 
@@ -232,6 +160,15 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       return PostSchema.parse(post[0]);
     },
 
+    async createPosts(postsData, tx?: unknown){
+      const conn = (tx || db) as NodePgDatabase;
+      if (postsData.length === 0) {
+        return [];
+      }
+      const posts = await conn.insert(postTable).values(postsData as Post[]).returning();
+      return PostSchema.array().parse(posts);
+    },
+
     async getPostById(id, tx?: unknown){
       const conn = (tx || db) as NodePgDatabase;
       const postWithComments = await conn.select({
@@ -241,6 +178,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         createdAt: postTable.createdAt,
         updatedAt: postTable.updatedAt,
         deletedAt: postTable.deletedAt,
+        createdBy: postTable.createdBy,
         comments: jsonAggBuildObject({
           id: commentTable.id,
           postId: commentTable.postId,
@@ -268,13 +206,8 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
         description: row.description,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
-        deletedAt: row.deletedAt ? new Date(row.deletedAt) : null,
-        comments: comments.map(comment => CommentSchema.parse({
-          ...comment,
-          createdAt: comment.createdAt ? new Date(comment.createdAt) : new Date(),
-          updatedAt: comment.updatedAt ? new Date(comment.updatedAt) : new Date(),
-          deletedAt: comment.deletedAt ? new Date(comment.deletedAt) : null
-        }))
+        createdBy: row.createdBy,
+        comments
       });
     },
 

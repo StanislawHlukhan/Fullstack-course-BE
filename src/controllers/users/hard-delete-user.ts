@@ -14,15 +14,12 @@ export async function hardDeleteUser(params: {
   transactionManager: ITransactionManager;
   userId: string;
 }) {
+  const user = await params.profileRepo.getProfileById(params.userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  
   return await params.transactionManager.execute(async (ctx) => {
-    // CODE REVIEW: гет треба винести за транзакцію. В цьому кейсі він не потребує транзакції.
-    // Транзакції варто використовувати для групи операцій, яким важлива цілісність даних і які потрібно виконати як єдине ціле. 
-    // Чим більше методів в транзакції, чим більше часу вона обробляється, тим довше твоя база блокується
-    const user = await params.profileRepo.getProfileById(params.userId, ctx.sharedTx);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
     const posts = await params.postRepo.getPostsByUserId(params.userId, ctx.sharedTx);
     const postIds = posts.map(p => p.id);
 
