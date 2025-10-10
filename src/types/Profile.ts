@@ -8,7 +8,7 @@ export const ProfileSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   email: z.string(),
-  dickSize: z.number(),
+  footSize: z.number(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   subId: z.string(),

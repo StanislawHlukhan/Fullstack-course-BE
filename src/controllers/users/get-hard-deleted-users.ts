@@ -10,7 +10,7 @@ export async function getHardDeletedUsers(params: {
     id: string;
     email: string;
     name: string;
-    dickSize: number;
+    footSize: number;
     createdAt: Date;
     isEnabled?: boolean;
     activatedAt?: Date | null;
@@ -73,7 +73,7 @@ export async function getHardDeletedUsers(params: {
       id: u.id || a.archivedUserId,
       email: u.email,
       name: u.name,
-      dickSize: u.dickSize,
+      footSize: u.footSize,
       createdAt,
       isEnabled: false,
       activatedAt,

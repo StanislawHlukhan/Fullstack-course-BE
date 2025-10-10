@@ -30,7 +30,7 @@ export async function hardRestoreUser(params: {
     const newProfile = await params.profileRepo.createProfile({
       name: userData.name,
       email: userData.email,
-      dickSize: userData.dickSize,
+      footSize: userData.footSize,
       subId: userData.subId,
       systemRole: userData.systemRole,
       activatedAt: activatedAtRaw ? new Date(activatedAtRaw) : null,

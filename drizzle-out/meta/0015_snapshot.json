@@ -372,8 +372,8 @@
           "notNull": false,
           "default": "now()"
         },
-        "dick_size": {
-          "name": "dick_size",
+        "foot_size": {
+          "name": "foot_size",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,

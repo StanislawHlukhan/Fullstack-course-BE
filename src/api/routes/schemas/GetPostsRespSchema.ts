@@ -30,7 +30,7 @@ export const GetPostsRespSchema = z.object({
       id: z.string().uuid(),
       name: z.string(),
       email: z.string(),
-      dickSize: z.number(),
+      footSize: z.number(),
       createdAt: z.date(),
       updatedAt: z.date(),
       subId: z.string(),
