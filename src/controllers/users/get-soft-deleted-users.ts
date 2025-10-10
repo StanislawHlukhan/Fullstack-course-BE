@@ -20,7 +20,7 @@ export async function getSoftDeletedUsers(params: {
       email: profile.email!,
       name: profile.name,
       isEnabled: user.isEnabled,
-      dickSize: profile.dickSize,
+      footSize: profile.footSize,
       activatedAt: profile.activatedAt,
       deletedAt: profile.deletedAt
       };

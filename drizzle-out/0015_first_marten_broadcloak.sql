@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" RENAME COLUMN "dick_size" TO "foot_size";

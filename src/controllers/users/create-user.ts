@@ -7,7 +7,7 @@ export async function createUser(params: {
   profileRepo: IProfileRepo,
   email: string,
   name: string,
-  dickSize: number
+  footSize: number
 }) {
   const identityUser = await params.identityService.createUser(
     params.email,
@@ -18,7 +18,7 @@ export async function createUser(params: {
     email: params.email,
     subId: identityUser.subId,
     name: params.name,
-    dickSize: params.dickSize,
+    footSize: params.footSize,
     systemRole: ESystemRole.user
   });
 

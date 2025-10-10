@@ -41,7 +41,7 @@ const routes: FastifyPluginAsync = async function (f) {
       profileRepo: fastify.repos.profileRepo,
       email: req.body.email,
       name: req.body.name,
-      dickSize: req.body.dickSize
+      footSize: req.body.footSize
     });
 
     return user;

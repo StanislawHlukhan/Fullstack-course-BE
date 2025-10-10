@@ -8,7 +8,7 @@ export async function signupUser(params: {
   email: string,
   password: string,
   name: string,
-  dickSize: number
+  footSize: number
 }) {
   const identityUser = await params.identityService.createUser(
     params.email,
@@ -19,7 +19,7 @@ export async function signupUser(params: {
     email: params.email,
     subId: identityUser.subId,
     name: params.name,
-    dickSize: params.dickSize,
+    footSize: params.footSize,
     systemRole: ESystemRole.user
   });
 
@@ -30,6 +30,6 @@ export async function signupUser(params: {
     createdAt: profile.createdAt,
     email: params.email,
     name: params.name,
-    dickSize: params.dickSize
+    footSize: params.footSize
   };
 }

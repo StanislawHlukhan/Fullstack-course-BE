@@ -114,7 +114,7 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
             id: profileTable.id,
             name: profileTable.name,
             email: profileTable.email,
-            dickSize: profileTable.dickSize,
+            footSize: profileTable.footSize,
             subId: profileTable.subId,
             createdAt: profileTable.createdAt,
             updatedAt: profileTable.updatedAt,

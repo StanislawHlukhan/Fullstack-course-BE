@@ -28,7 +28,7 @@ export const profileTable = pgTable('profiles', {
   email: varchar({ length: 255 }).notNull(),
   createdAt: timestamp().defaultNow(),
   updatedAt: timestamp().defaultNow().$onUpdate(() => new Date()),
-  dickSize: integer().notNull().default(1),
+  footSize: integer().notNull().default(1),
   systemRole: varchar({ length: 255 }).default('user'),
   activatedAt: timestamp(),
   deletedAt: timestamp()
