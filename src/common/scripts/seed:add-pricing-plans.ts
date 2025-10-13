@@ -51,6 +51,8 @@ const logger = pino();
       }
     ];
 
+    // CODE REVIEW: Не треба робити запити в базу в циклі. Тут краще зробити одним запитом. 
+    // Для того щоб не робити дублікати, треба використати onConflictDoNothing. 
     for (const plan of pricingPlansData) {
       const existingPlan = await db
         .select()

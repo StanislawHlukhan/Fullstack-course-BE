@@ -7,6 +7,7 @@ export async function createSubscription(params: {
   pricingPlanRepo: IPricingPlanRepo;
   data: Partial<Subscription>;
 }) {
+  // STRIPE: Тут треба додати валідацію, щоб не було помилок. 
   const pricingPlan = await params.pricingPlanRepo.getPricingPlanByStripePriceId(params.data.stripePriceId!);
   const subscription = await params.subscriptionRepo.createSubscription({
     ...params.data,

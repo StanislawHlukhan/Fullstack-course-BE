@@ -100,6 +100,7 @@ async function run() {
     skip: ['/api/documentation'],
     logLevel: 'silent'
   });
+  // STRIPE: Цей плагін має бути підключений лише в роуті stripe.route.ts. Він використовується лише для вебхука.
   server.register(fastifyRawBody, {
     field: 'rawBody',   
     global: true,     

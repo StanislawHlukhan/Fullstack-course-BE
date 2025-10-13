@@ -4,6 +4,7 @@ import { cancelSubscriptionByStripeId } from 'src/controllers/subscriptions/canc
 import { createSubscription } from 'src/controllers/subscriptions/create-subscription';
 import { paymentFailed } from 'src/controllers/subscriptions/payment-failed';
 import { updateSubscriptionByStripeId } from 'src/controllers/subscriptions/update-subscription-by-stripe-id';
+// STRIPE: імпорт сервіса
 import { stripeService } from 'src/services/stripe/stripe.service';
 
 const routes: FastifyPluginAsync = async function (f) {
@@ -24,6 +25,7 @@ const routes: FastifyPluginAsync = async function (f) {
       return reply.code(400).send({ error: 'Missing signature' });
     }
 
+    // STRIPE: Це все бізнес логіка, вона має бути в контролері а не в роуті. 
     try {
 
       const event = await stripeService.constructWebhookEvent(

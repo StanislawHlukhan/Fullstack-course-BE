@@ -7,6 +7,7 @@ export async function changeSubscription(params: {
   priceId: string;
 }) {
   const currentSubscription = await params.subscriptionRepo.getActiveSubscriptionByUserId(params.userId);
+  // STRIPE: Чому ти впевнений що в нього буде підписки? 
   const subscription = await stripeService.changeSubscription(currentSubscription!.stripeSubscriptionId, params.priceId);
   return subscription;
 }

@@ -52,6 +52,8 @@ const routes: FastifyPluginAsync = async function (f) {
     });
     return subscription;
   });
+
+  // STRIPE: Не має роута на кенсел і ренью підписки.
 };
 
 export default routes;

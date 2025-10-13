@@ -30,6 +30,7 @@ export const authHook: preHandlerAsyncHookHandler = async function (request) {
 
     const subscription = await this.repos.subscriptionRepo.getActiveSubscriptionByUserId(profile.id);
     
+    // STRIPE: Цей код дуже поганий, тому що в кожному запиті юзера стукаешся на страйп щоб отримати посилання на портал. 
     let customerPortalUrl: string | undefined;
     if (profile.stripeCustomerId) {
       try {
@@ -50,6 +51,7 @@ export const authHook: preHandlerAsyncHookHandler = async function (request) {
     request.identityUser = identityUser;
     request.profile = {
       ...profile,
+      // STRIPE: subscription треба винести окремо від profile, і гетати окремим запитом.
       subscription: subscription ? {
         name: subscription.name,
         expiresAt: subscription.currentPeriodEnd,
