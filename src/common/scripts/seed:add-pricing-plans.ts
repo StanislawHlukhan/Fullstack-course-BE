@@ -3,7 +3,6 @@ import 'src/services/env/env.service';
 import { getDb } from 'src/services/drizzle/drizzle.service';
 import pino from 'pino';
 import { pricingPlanTable } from 'src/services/drizzle/schema';
-import { eq } from 'drizzle-orm';
 
 const logger = pino();
 
@@ -27,7 +26,7 @@ const logger = pino();
         stripeProductId: 'prod_T8NvYXqWwkL0wb',
         name: 'Giant',
         description: 'Insane subscription for giants.',
-        price: '40.00',
+        priceInCents: 4000,
         currency: 'usd',
         interval: 'monthly',
         features: ['power', 'strength'],
@@ -41,7 +40,7 @@ const logger = pino();
         stripeProductId: 'prod_T8NtPOA7zftI3A',
         name: 'Hobbit',
         description: 'Subscription for hobbits.',
-        price: '20.00',
+        priceInCents: 2000,
         currency: 'usd',
         interval: 'monthly',
         features: ['silent', 'agility'],
@@ -51,23 +50,10 @@ const logger = pino();
       }
     ];
 
-    // CODE REVIEW: Не треба робити запити в базу в циклі. Тут краще зробити одним запитом. 
-    // Для того щоб не робити дублікати, треба використати onConflictDoNothing. 
-    for (const plan of pricingPlansData) {
-      const existingPlan = await db
-        .select()
-        .from(pricingPlanTable)
-        .where(eq(pricingPlanTable.stripePriceId, plan.stripePriceId))
-        .limit(1);
-
-      if (existingPlan[0]) {
-        logger.info(`Pricing plan already exists: ${plan.name}`);
-        continue;
-      }
-
-      await db.insert(pricingPlanTable).values(plan);
-      logger.info(`Pricing plan added: ${plan.name} (${plan.stripePriceId})`);
-    }
+    await db
+      .insert(pricingPlanTable)
+      .values(pricingPlansData)
+      .onConflictDoNothing();
 
     logger.info('Pricing plans seed completed');
 

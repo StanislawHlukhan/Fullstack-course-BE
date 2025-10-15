@@ -21,8 +21,8 @@ import { getDb, dbHealthCheck } from 'src/services/drizzle/drizzle.service';
 import { getAWSCognitoService } from 'src/services/aws/cognito/cognito.service';
 import { getMailService } from 'src/services/sendgrid/sendgrid.service';
 import { getAWSKMSService } from 'src/services/kms/kms.service';
-import fastifyRawBody from 'fastify-raw-body';
 import { getTransactionManager } from 'src/services/drizzle/drizzle.service';
+import { getStripeService } from 'src/services/stripe/stripe.service';
 
 async function run() {
   const server = fastify({
@@ -68,6 +68,7 @@ async function run() {
   server.decorate('uuid', getUUIDService());
   server.decorate('mailService', getMailService(process.env.SENDGRID_API_KEY!));
   server.decorate('cryptoService', getAWSKMSService(process.env.AWS_REGION!, process.env.AWS_KMS_KEY_ID!));
+  server.decorate('stripeService', getStripeService(process.env.STRIPE_SECRET_KEY!));
   server.decorate(
     'identityService',
     getAWSCognitoService(process.env.AWS_REGION!)
@@ -99,14 +100,6 @@ async function run() {
   server.register(routePrinter, {
     skip: ['/api/documentation'],
     logLevel: 'silent'
-  });
-  // STRIPE: Цей плагін має бути підключений лише в роуті stripe.route.ts. Він використовується лише для вебхука.
-  server.register(fastifyRawBody, {
-    field: 'rawBody',   
-    global: true,     
-    encoding: 'utf8',
-    runFirst: true,
-    routes: [] // Apply to all routes by default
   });
   // load routes
   server.register(autoload, {

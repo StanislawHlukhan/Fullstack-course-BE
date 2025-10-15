@@ -17,9 +17,8 @@ export function getStripeService(secretKey: string): IStripeService {
         payment_method_types: ['card'],
         line_items: [{ price: priceId, quantity: 1 }],
         mode: 'subscription',
-        // STRIPE: Чи ти обробляєш успішний і не успішний кейс на фронті?
         success_url: `${process.env.FRONTEND_URL}/plans`,
-        cancel_url: `${process.env.FRONTEND_URL}/plans`,
+        cancel_url: `${process.env.FRONTEND_URL}/failed-payment`,
         subscription_data: {
           metadata: { userId }
         }
@@ -54,5 +53,3 @@ export function getStripeService(secretKey: string): IStripeService {
     }
   };
 }
-
-export const stripeService = getStripeService(process.env.STRIPE_SECRET_KEY!);

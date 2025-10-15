@@ -8,8 +8,10 @@ export async function updateSubscriptionByStripeId(params: {
   pricingPlanRepo: IPricingPlanRepo;
   data: Partial<Subscription>;
 }) {
-  // STRIPE: Тут треба додати валідацію, щоб не було помилок. 
-  const pricingPlan = await params.pricingPlanRepo.getPricingPlanByStripePriceId(params.data.stripePriceId!);
+  if (!params.data.stripePriceId) {
+    throw new Error('Stripe price id is required');
+  }
+  const pricingPlan = await params.pricingPlanRepo.getPricingPlanByStripePriceId(params.data.stripePriceId);
   const subscription = await params.subscriptionRepo.updateSubscriptionByStripeId(params.stripeSubscriptionId, {
     ...params.data,
     name: pricingPlan!.name

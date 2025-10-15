@@ -34,7 +34,8 @@ const routes: FastifyPluginAsync = async function (f) {
       profileRepo: fastify.repos.profileRepo,
       userId: req.profile!.id,
       userEmail: req.profile!.email,
-      priceId: req.body.priceId
+      priceId: req.body.priceId,
+      stripeService: fastify.stripeService
     });
   });
   
@@ -48,12 +49,11 @@ const routes: FastifyPluginAsync = async function (f) {
     const subscription = await changeSubscription({
       subscriptionRepo: fastify.repos.subscriptionRepo,
       userId: req.profile!.id,
-      priceId: req.body.priceId
+      priceId: req.body.priceId,
+      stripeService: fastify.stripeService
     });
     return subscription;
   });
-
-  // STRIPE: Не має роута на кенсел і ренью підписки.
 };
 
 export default routes;

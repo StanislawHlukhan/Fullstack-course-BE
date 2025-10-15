@@ -6,7 +6,7 @@ export const GetPricingPlansResSchema = z.array(z.object({
   stripeProductId: z.string(),
   name: z.string(),
   description: z.string().nullable().optional(),
-  price: z.number(),
+  priceInCents: z.number(),
   currency: z.string(),
   interval: z.string(),
   features: z.array(z.string()),

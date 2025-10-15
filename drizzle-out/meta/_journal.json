@@ -127,6 +127,13 @@
       "when": 1759184785241,
       "tag": "0017_many_micromax",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1760524814217,
+      "tag": "0018_jazzy_cable",
+      "breakpoints": true
     }
   ]
 }

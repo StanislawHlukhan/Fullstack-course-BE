@@ -1,4 +1,4 @@
-import { uuid, pgTable, varchar, timestamp, integer, jsonb, boolean, text, decimal } from 'drizzle-orm/pg-core';
+import { uuid, pgTable, varchar, timestamp, integer, jsonb, boolean, text } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const postTable = pgTable('posts', {
@@ -82,11 +82,7 @@ export const pricingPlanTable = pgTable('pricing_plans', {
   stripeProductId: varchar('stripe_product_id').notNull(),
   name: varchar('name').notNull(),
   description: text('description'),
-  // STRIPE: Зберігай ціну в центах. 
-  // Старайся уникати дробних чисел в базі данних. decimal буде займати більше пам'яті ніж integer.
-  // З цілими числами легше працювати, ніколи не буде проблем з обчисленням і округленням. 
-  // І тобі буде легше працювати зі страйпом, бо він працює лише з центами.
-  price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+  priceInCents: integer().notNull(),
   currency: varchar('currency').default('usd'),
   interval: varchar('interval').notNull(),
   features: varchar('features').array(),

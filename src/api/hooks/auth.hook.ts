@@ -1,6 +1,5 @@
 import { preHandlerAsyncHookHandler } from 'fastify';
 import { HttpError } from '../errors/HttpError';
-import { stripeService } from 'src/services/stripe/stripe.service';
 
 const TOKEN_HEADER_NAME = 'Authorization';
 
@@ -27,37 +26,13 @@ export const authHook: preHandlerAsyncHookHandler = async function (request) {
     if (!profile) {
       throw new Error('No profile');
     }
-
-    const subscription = await this.repos.subscriptionRepo.getActiveSubscriptionByUserId(profile.id);
-    
-    // STRIPE: Цей код дуже поганий, тому що в кожному запиті юзера стукаешся на страйп щоб отримати посилання на портал. 
-    let customerPortalUrl: string | undefined;
-    if (profile.stripeCustomerId) {
-      try {
-        const portalSession = await stripeService.createCustomerPortalSession(
-          profile.stripeCustomerId, 
-          `${process.env.FRONTEND_URL}/plans`
-        );
-        customerPortalUrl = portalSession.url;
-      } catch (error) {
-        request.log.warn({ error, stripeCustomerId: profile.stripeCustomerId }, 'Failed to create customer portal session');
-      }
-    }
     
     request.log = request.log.child({ 
       identityUser
     });
 
     request.identityUser = identityUser;
-    request.profile = {
-      ...profile,
-      // STRIPE: subscription треба винести окремо від profile, і гетати окремим запитом.
-      subscription: subscription ? {
-        name: subscription.name,
-        expiresAt: subscription.currentPeriodEnd,
-        customerPortalUrl: customerPortalUrl!
-      } : undefined
-    };
+    request.profile = profile;
   } catch (err) {
     throw new HttpError(401, 'Auth err', err);
   }

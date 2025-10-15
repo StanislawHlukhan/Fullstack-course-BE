@@ -11,7 +11,6 @@ export const GetMeRespSchema = z.object({
   systemRole: z.nativeEnum(ESystemRole),
   subscription: z.object({
     name: z.string(),
-    expiresAt: z.date(),
-    customerPortalUrl: z.string().url().optional()
+    expiresAt: z.date()
   }).nullable().optional()
 });;

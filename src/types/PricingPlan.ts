@@ -6,7 +6,7 @@ export const PricingPlanSchema = z.object({
   stripeProductId: z.string(),
   name: z.string(),
   description: z.string(),
-  price: z.string().transform((val) => parseFloat(val)),
+  priceInCents: z.number(),
   currency: z.string(),
   interval: z.string(),
   features: z.array(z.string()),

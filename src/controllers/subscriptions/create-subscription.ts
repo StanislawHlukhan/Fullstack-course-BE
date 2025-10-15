@@ -7,11 +7,16 @@ export async function createSubscription(params: {
   pricingPlanRepo: IPricingPlanRepo;
   data: Partial<Subscription>;
 }) {
-  // STRIPE: Тут треба додати валідацію, щоб не було помилок. 
-  const pricingPlan = await params.pricingPlanRepo.getPricingPlanByStripePriceId(params.data.stripePriceId!);
+  if (!params.data.stripePriceId) {
+    throw new Error('Stripe price id is required');
+  }
+  const pricingPlan = await params.pricingPlanRepo.getPricingPlanByStripePriceId(params.data.stripePriceId);
+  if (!pricingPlan) {
+    throw new Error('Pricing plan not found');
+  }
   const subscription = await params.subscriptionRepo.createSubscription({
     ...params.data,
-    name: pricingPlan!.name
+    name: pricingPlan.name
   });
   return subscription;
 }
