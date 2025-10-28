@@ -12,7 +12,8 @@
     "lint:fix": "eslint --fix .",
     "db:migration:run": "npx drizzle-kit migrate",
     "db:migration:generate": "npx drizzle-kit generate",
-    "db:migration:studio": "npx drizzle-kit studio"
+    "db:migration:studio": "npx drizzle-kit studio",
+    "seed:pricing-plans": "ts-node -r tsconfig-paths/register src/common/scripts/seed:add-pricing-plans.ts"
   },
   "keywords": [],
   "author": "",
@@ -31,9 +32,11 @@
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.38.4",
     "fastify": "^5.2.1",
+    "fastify-raw-body": "^5.0.0",
     "fastify-type-provider-zod": "^4.0.2",
     "pg": "^8.13.1",
     "resend": "^6.0.2",
+    "stripe": "^18.5.0",
     "tsconfig-paths": "^4.2.0",
     "zod": "^3.24.1"
   },

@@ -6,6 +6,7 @@ import { IMailService } from 'src/types/IMailService';
 import { IdentityUser } from 'src/types/IdentityUser';
 import { IStorageService } from './IStorageService';
 import { Profile } from './Profile';
+import { IStripeService } from './IStripeService';
 
 // set context type
 declare module 'fastify' {
@@ -17,7 +18,8 @@ declare module 'fastify' {
     mailService: IMailService,
     storageService: IStorageService,
     cryptoService: ICryptoService,
-    transactionManager: ITransactionManager
+    transactionManager: ITransactionManager,
+    stripeService: IStripeService
   }
 
   interface FastifyRequest {

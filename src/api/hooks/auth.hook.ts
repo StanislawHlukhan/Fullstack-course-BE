@@ -26,7 +26,7 @@ export const authHook: preHandlerAsyncHookHandler = async function (request) {
     if (!profile) {
       throw new Error('No profile');
     }
-
+    
     request.log = request.log.child({ 
       identityUser
     });

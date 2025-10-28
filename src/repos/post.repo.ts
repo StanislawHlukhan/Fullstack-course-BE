@@ -191,7 +191,14 @@ export const getPostRepo = (db: NodePgDatabase): IPostRepo => {
       .from(postTable)
       .leftJoin(commentTable, eq(postTable.id, commentTable.postId))
       .where(eq(postTable.id, id))
-      .groupBy(postTable.id, postTable.title, postTable.description, postTable.createdAt, postTable.updatedAt);
+      .groupBy(
+        postTable.id, 
+        postTable.title, 
+        postTable.description, 
+        postTable.createdAt, 
+        postTable.updatedAt, 
+        postTable.createdBy
+      );
 
       if (postWithComments.length === 0) {
         throw new Error('Post not found');

@@ -19,7 +19,10 @@ export const EnvSchema = z.object({
   RESEND_API_KEY: z.string(),
   FROM_EMAIL: z.string(),
   FRONTEND_SIGNUP_URL: z.string(),
-  SENDGRID_API_KEY: z.string()
+  SENDGRID_API_KEY: z.string(),
+  STRIPE_SECRET_KEY: z.string(),
+  STRIPE_WEBHOOK_SECRET: z.string(),
+  FRONTEND_URL: z.string()
 });
 
 export type Env = z.infer<typeof EnvSchema>;

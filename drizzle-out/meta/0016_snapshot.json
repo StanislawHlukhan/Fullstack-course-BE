@@ -1,6 +1,6 @@
 {
-  "id": "d9b9ec8b-4b00-46be-9a35-53baed32b003",
-  "prevId": "2d65e63b-b08c-4028-ac20-775ec212beb6",
+  "id": "f71ce0b5-3a57-401f-91c5-85c8104ee268",
+  "prevId": "d9b9ec8b-4b00-46be-9a35-53baed32b003",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -372,8 +372,8 @@
           "notNull": false,
           "default": "now()"
         },
-        "foot_size": {
-          "name": "foot_size",
+        "dick_size": {
+          "name": "dick_size",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -648,8 +648,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "payload": {
-          "name": "payload",
+        "data": {
+          "name": "data",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false

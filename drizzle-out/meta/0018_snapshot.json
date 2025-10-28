@@ -1,6 +1,6 @@
 {
-  "id": "d9b9ec8b-4b00-46be-9a35-53baed32b003",
-  "prevId": "2d65e63b-b08c-4028-ac20-775ec212beb6",
+  "id": "43ad3a7c-0b17-4065-ad40-8a24d36e8d95",
+  "prevId": "c9f2f8de-6ca9-4da4-9184-944db196697f",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -260,9 +260,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "price": {
-          "name": "price",
-          "type": "numeric(10, 2)",
+        "price_in_cents": {
+          "name": "price_in_cents",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -444,6 +444,12 @@
         },
         "status": {
           "name": "status",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -648,8 +654,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "payload": {
-          "name": "payload",
+        "data": {
+          "name": "data",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false

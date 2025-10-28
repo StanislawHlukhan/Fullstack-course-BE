@@ -12,14 +12,10 @@ export const ProfileSchema = z.object({
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   subId: z.string(),
+  stripeCustomerId: z.string().nullable().optional(),
   systemRole: z.nativeEnum(ESystemRole),
   activatedAt: z.coerce.date().nullable().optional(),
-  deletedAt: z.coerce.date().nullable().optional(),
-  subscription: z.object({
-    name: z.string(),
-    expiresAt: z.coerce.date(),
-    customerPortalUrl: z.string().url()
-  }).nullable().optional()
+  deletedAt: z.coerce.date().nullable().optional()
 });
 
 export type Profile = z.infer<typeof ProfileSchema>;
