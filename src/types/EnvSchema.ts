@@ -22,7 +22,10 @@ export const EnvSchema = z.object({
   SENDGRID_API_KEY: z.string(),
   STRIPE_SECRET_KEY: z.string(),
   STRIPE_WEBHOOK_SECRET: z.string(),
-  FRONTEND_URL: z.string()
+  FRONTEND_URL: z.string(),
+  REDIS_URL: z.string().optional(),
+  WS_HOST: z.string().optional(),
+  WS_PORT: z.string().optional()
 });
 
 export type Env = z.infer<typeof EnvSchema>;
