@@ -1,5 +1,4 @@
- 
-import 'src/services/env/env.service';
+ import 'src/services/env/env.service';
 import fastify from 'fastify';
 import autoload from '@fastify/autoload';
 import path from 'path';

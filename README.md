@@ -11,6 +11,45 @@
 7. To open drizzle.studio use command npm run db:migration:studio
 
 
+## Realtime (Socket.IO + Redis)
+
+### Environment variables
+
+Add these variables to your environment (e.g., .env):
+
+```env
+# WebSocket server
+WS_HOST=0.0.0.0
+WS_PORT=4001
+
+# Redis connection
+REDIS_URL=redis://localhost:6379
+
+# Auth (Cognito used by API and WS for JWT validation)
+AWS_REGION=us-east-1
+AWS_USER_POOL_ID=your_pool_id
+
+# Frontend origin for CORS (WS server)
+FRONTEND_URL=http://localhost:3000
+```
+
+### Run commands
+
+- API (REST):
+  - Local: `npm run local`
+  - Production build: `npm run build && npm run production`
+
+- WebSocket server:
+  - Local: `npm run ws:local`
+  - Production build: `npm run build && npm run ws:prod`
+
+### How it works
+
+- API publishes comment events to Redis channels `comments:post:<postId>` after create/update (and delete when implemented).
+- WS server subscribes to `comments:post:*` and emits `comments:event` to room `post:<postId>`.
+- Clients join/leave rooms using `join_post` / `leave_post` events and must provide a valid JWT on connection.
+
+
 ## Local usage
 
 npm run seed:pricing-plans - to insert pricing plans to db
